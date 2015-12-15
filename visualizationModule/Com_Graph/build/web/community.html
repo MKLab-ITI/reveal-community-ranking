@@ -1,0 +1,199 @@
+<!--
+    Document   : Community
+    Author     : Lazaros Apostolidis
+    Email      : laaposto@iti.gr
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        
+        <title>SocialSensor</title>
+        
+        <meta name="description" content="Stream media from social networks">
+        <meta name="author" content="Laaposto">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+        
+        <link rel="shortcut icon" href="imgs/favicon.ico" />
+        
+        <!-- CSS -->
+        <link rel="stylesheet" href="nv.d3.css">
+        <!--END CSS -->
+       
+    </head>
+ 
+
+<body class='with-3d-shadow with-transitions'>
+    
+    <div id="myModal1" class="reveal-modal myModal">
+            	<h1>Oops! Something went wrong</h1>
+                <p>Please select a timeslot and community with data.</p>
+                <a class="close-reveal-modal">&#215;</a>
+        </div>
+    
+    <div id="myModal2" class="reveal-modal">
+             
+        <div id="info">
+            <div id="infophoto"><a id="link2" href="" target="_blank"><img src="" alt="" onError="this.src='imgs/noprofile.gif';"/></a></div>
+            <div id="infoname">Name</div>
+            <div id="infouser"></div>
+            <div id="infodesc">Description text goes here</div>
+            <div id="infoloc"><img src="imgs/loca.png" alt="error" />Greece</div>
+            <div id="infotw" class="box" style="right:260px"><span>1270</span><br/><span>Tweets</span></div>
+            <div id="infofw" class="box" style="right:140px"><span>853</span><br/><span>Following</span></div>
+            <div id="infofs" class="box" style="right:20px"><span>345</span><br/><span>Followers</span></div>
+            
+        </div>
+      
+        <div id="net">
+            <div id="graph-container-inside"></div>
+            <!--<div class="s3d twitter">Conversation
+                <span class="iconmes"></span>
+            </div>-->
+        </div>
+      
+      <div id="graph">
+        <div id="chart4"><svg></svg></div>  
+      </div>
+	<a class="close-reveal-modal">&#215;</a>
+  </div>
+    <!--<div id="overlay"></div>
+    <div id="conve">
+        <p class="close" id="closeconve"><img src="imgs/close.png" alt="close"/></p>
+        
+	<section id="cd-timeline" class="cd-container"></section> 
+    </div>-->
+    
+    
+
+<div id="chart1"><svg></svg></div>
+<div class="content">
+  <div id="admin">size by Centrality</div>
+  <div id="settings"><img src="imgs/down.png" alt="errot"/></div>
+  <div id="menu">
+    <div id="arrow"></div>
+    <div>Users <i id="firstIcon"><img src="imgs/users.png" alt="errot"/></i></div>
+    <div>Centrality <i id="secondIcon"><img src="imgs/cent.png" alt="errot"/></i></div>
+    <div>Connections <i id="thirdIcon"><img src="imgs/conne.png" alt="errot"/></i></div>
+    </div>
+</div>
+<!--<div id="chart2" ><svg></svg></div>-->
+<div id="container" style="opacity:0">  
+            <div id="graph-container"></div>
+            <!--<div id="control-pane">
+                <h2 class="underline">filters</h2>
+                <div>
+                    <h3>min degree <span id="min-degree-val">1</span></h3>
+                    1 <input id="min-degree" type="range" min="1" max="0" value="0"> <span id="max-degree-value">0</span><br>
+                </div>
+                <span class="line"></span>
+                <div id="dump" class="hidden"></div>
+            </div>
+            !-->
+            <span id="next"></span>
+            <span id="prev"></span>
+           <!-- <div id="date" ><span id="comtitle"></span><span id="datenum"></span><span id="back">Back to main</span></div>!-->
+            <div id="chart3"><svg></svg></div>
+            <img id="minimize" src="imgs/less.png" alt="close" >
+            <img id="expand" src="imgs/more.png" alt="close" style=" display: none;">
+            <div id="back">Back to main</div>
+            <div class="user-profile">
+                <a id="link" href="" target="_blank"><img class="avatar" src="imgs/noprofile.gif" alt="" onError="this.src='imgs/noprofile.gif';"/></a>
+                <div class="username">Username</div>
+                <div class="bio"></div>
+                <div class="description">Description profile</div>
+                <div id="g1"></div>
+            
+                <ul class="data">
+                    <li>
+                        <span>1270</span>
+                        <p>Tweets</p>
+                    </li>
+                    <li>
+                        <span>853</span>
+                        <p>Following</p>
+                    </li>   
+                    <li>
+                        <span>345</span>
+                        <p>Followers</p>
+                    </li>   
+                </ul>
+                <div id="more"><img src="imgs/useradd.png" alt="close"/>More</div>
+                <p class="close" id="closeuser"><img src="imgs/close.png" alt="close"/></p>
+            </div>
+            
+</div>
+<!-- <div id="nodata"><img id="nodataimg" src="imgs/nodata.png" alt="nodata" style="display:block;"><img id="nodatatitle" src="imgs/nodatatitle.png" alt="nodatatitle"></div>!-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="linejs/d3.v3.js"></script>
+<script src="linejs/nv.d3liq.js"></script>
+<!--<script src="linejs/tooltip.js"></script>
+<script src="linejs/utils.js"></script>
+<script src="linejs/interactiveLayer.js"></script>
+<script src="linejs/legend.js"></script>
+<script src="linejs/axis.js"></script>
+<script src="linejs/scatter.js"></script>
+<script src="linejs/line.js"></script>!-->
+<script src="linejs/lineChart.js"></script>
+<!--<script src="linejs/discreteBar.js"></script>
+<script src="linejs/discreteBarChart.js"></script>!-->
+<script src="linejs/jquery.reveal.js"></script>
+<script src="linejs/d3tagcloud.js"></script>
+<script src="linejs/plot.js"></script>
+<script src="linejs/drop.js"></script>
+
+<script src="netjs/sigma.core.js"></script>
+<script src="netjs/conrad.js"></script>
+<script src="netjs/sigma.utils.js"></script>
+<script src="netjs/sigma.polyfills.js"></script>
+<script src="netjs/sigma.settings.js"></script>
+<script src="netjs/sigma.classes.dispatcher.js"></script>
+<script src="netjs/sigma.classes.configurable.js"></script>
+<script src="netjs/sigma.classes.graph.js"></script>
+<script src="netjs/sigma.classes.camera.js"></script>
+<script src="netjs/sigma.classes.quad.js"></script>
+<script src="netjs/sigma.captors.mouse.js"></script>
+<script src="netjs/sigma.captors.touch.js"></script>
+<script src="netjs/sigma.renderers.canvas.js"></script>
+<!--<script src="netjs/sigma.renderers.webgl.js"></script>-->
+<!--<script src="netjs/sigma.renderers.def.js"></script>-->
+<!--<script src="netjs/sigma.webgl.nodes.def.js"></script>
+<script src="netjs/sigma.webgl.nodes.fast.js"></script>
+<script src="netjs/sigma.webgl.edges.def.js"></script>
+<script src="netjs/sigma.webgl.edges.fast.js"></script>
+<script src="netjs/sigma.webgl.edges.arrow.js"></script>-->
+<script src="netjs/sigma.canvas.labels.def.js"></script>
+<script src="netjs/sigma.canvas.hovers.def.js"></script>
+<script src="netjs/sigma.canvas.nodes.def.js"></script>
+<script src="netjs/sigma.canvas.edges.def.js"></script>
+<!--<script src="netjs/sigma.canvas.edges.curve.js"></script>
+<script src="netjs/sigma.canvas.edges.arrow.js"></script>-->
+<script src="netjs/sigma.canvas.edges.curvedArrow.js"></script>
+<script src="netjs/sigma.middlewares.rescale.js"></script>
+<!--<script src="netjs/sigma.middlewares.copy.js"></script>-->
+<script src="netjs/sigma.misc.animation.js"></script>
+<script src="netjs/sigma.misc.bindEvents.js"></script>
+<script src="netjs/sigma.misc.drawHovers.js"></script>
+<script src="netjs/sigma.plugins.animate.js"></script>
+<!--<script src="netjs/sigma.plugins.dragNodes.js"></script>
+<script src="netjs/sigma.plugins.filter.js"></script>-->
+<script src="netjs/worker.js"></script>
+<script src="netjs/supervisor.js"></script>
+<!--<script src="netjs/vague.js"></script>
+<script src="netjs/timeline.js"></script>
+<script src="netjs/modernizr.js"></script>-->
+<script src="netjs/plot.js"></script>
+<script src="netjs/raphael.2.1.0.min.js"></script>
+<script src="netjs/justgage.1.0.1.min.js"></script>
+
+
+
+</body>
+
+</html>
