@@ -26,7 +26,11 @@ class communityranking:
         client = MongoClient(mongoHost)
         db = client[dataCollection]
         coll = db.Item
-        tweet_iterator = coll.find({'timestamp_ms':{'$gte':lowerTime,'$lte':upperTime}})
+        if lowerTime and upperTime:
+            tweet_iterator = coll.find({'timestamp_ms':{'$gte':lowerTime,'$lte':upperTime}})
+        else:
+            tweet_iterator = coll.find()
+            pass
 
         tweetDict = {'files':[],'tweets':{}}
         userDict = {}
@@ -523,10 +527,10 @@ class communityranking:
         rankedtextentropy = sorted(rankingDict, key=lambda k: [rankingDict[Id]['avgBigramTextentropy'],rankingDict[k]['textentropy'],rankingDict[k]['size']], reverse = True)
         rankedUrlAvg = sorted(rankingDict, key=lambda k: [rankingDict[k]['urlAvg'],rankingDict[k]['size'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
         # rankedSimilarityAvg = sorted(rankingDict, key=lambda k: [rankingDict[k]['similarityAvg'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
-        rankedReciprocity = sorted(rankingDict, key=lambda k: [rankingDict[k]['reciprocity'],rankingDict[k]['connections']], reverse = True)
+        # rankedReciprocity = sorted(rankingDict, key=lambda k: [rankingDict[k]['reciprocity'],rankingDict[k]['connections']], reverse = True)
         commRanking = {}
         for Id in self.uniCommIds:
-            commRanking[Id] = recRank([rankedConnections.index(Id),rankedReciprocity.index(Id),rankedUrlAvg.index(Id),rankedtextentropy.index(Id),rankedPerstability.index(Id),rankedcommCentralityNormed.index(Id),rankedcommSize.index(Id)])
+            commRanking[Id] = recRank([rankedConnections.index(Id),rankedUrlAvg.index(Id),rankedtextentropy.index(Id),rankedPerstability.index(Id),rankedcommCentralityNormed.index(Id),rankedcommSize.index(Id)])
 
         self.rankingDict = rankingDict
 
@@ -683,6 +687,7 @@ class communityranking:
                 communityTweetsPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = popTweets.most_common(10)
 
                 #topic extraction
+                tmptweetText = list(set(tmptweetText))
                 topicList = ' '.join(tmptweetText)
                 topicList = topicList.lower()
                 # topicList = regex1.sub('', topicList)

@@ -12,12 +12,15 @@
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
 import time, os, sys, socket
-from CommunityRanking_vIntgrt import communityranking
-print(time.asctime( time.localtime(time.time()) ))
-
 '''Check for dependencies'''
-##import subprocess
-##subprocess.call('python dependencyCheck.py install')
+try:
+    import igraph
+except:
+    print("Please run the setup file to install dependencies: \"\python dependencyCheck.py install\"")
+    # pass
+from CommunityRanking_vIntgrt import communityranking
+#-------------------------------
+print(time.asctime( time.localtime(time.time()) ))
 
 '''PARAMETERS'''
 # User sets mongo host
@@ -37,12 +40,12 @@ except:
 try:
     lowerTime = float(sys.argv[3])
 except:
-    lowerTime = 0#(1393342340+3600*12)*1000#
+    lowerTime = False
     pass
 try:
     upperTime = float(sys.argv[4])
 except:
-    upperTime = int(time.time()*1000)#(1393431754-3600*12)*1000#
+    upperTime = False
     pass
 
 if not os.path.exists('./tmp/'):
