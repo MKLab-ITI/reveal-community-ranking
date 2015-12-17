@@ -487,7 +487,7 @@ nv.addGraph(function () {
                 }
 
                 if (!(bigrams[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] === "-")) {
-                    $('#bigramsdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + bigrams[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(bigramssize[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1]) + '</p>');
+                    $('#bigramsdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + bigrams[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(bigramssize[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5]) + '</p>');
                 }
                 if (!(bigrams[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1] === "-")) {
                     $('#bigramsdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + bigrams[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(bigramssize[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1]) + '</p>');
@@ -503,7 +503,7 @@ nv.addGraph(function () {
                 }
 
                 if (!(domains[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] === "-")) {
-                    $('#domainsdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + domains[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(domainssize[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1]) + '</p>');
+                    $('#domainsdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + domains[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(domainssize[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5]) + '</p>');
                 }
                 if (!(domains[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1] === "-")) {
                     $('#domainsdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + domains[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(domainssize[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1]) + '</p>');
@@ -519,7 +519,7 @@ nv.addGraph(function () {
                 }
 
                 if (!(ucent[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] === "-")) {
-                    $('#ucentdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + ucent[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(ucentsize[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1]) + '</p>');
+                    $('#ucentdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + ucent[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(ucentsize[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5]) + '</p>');
                 }
                 if (!(ucent[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1] === "-")) {
                     $('#ucentdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + ucent[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(ucentsize[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 1]) + '</p>');
