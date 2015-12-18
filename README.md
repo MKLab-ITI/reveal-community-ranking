@@ -6,7 +6,7 @@ Reveal Community Ranking
 A framework for the exploration of Twitter Communication Dynamics with Evolving Community Analysis.
 ##Community ranking module##
 The community ranking module is written in python (2.7 compatible) and can be run using either an IDE and manually inserting the parameters, or by giving a command in a terminal as follows:
-* <code>sudo python main_vIntgrt_27.py MongoDB_hostIP collectionId timestamp_start timestamp_end visualization_hostIP visualizationModeulePath sshUsername sshPassword</code> 
+* <code>sudo python main_vIntgrt_27.py MongoDB_hostIP collectionId timestamp_start timestamp_end visualization_hostIP visualizationModulePath sshUsername sshPassword</code> 
 
 Please keep in mind that:   
 a) If no MongoDB_hostIP is provided, then _localhost_ is used   
