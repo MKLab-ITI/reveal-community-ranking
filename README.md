@@ -18,9 +18,9 @@ The libraries required for the module to run include: _python-dateutil_, _reques
 * <code>sudo python dependencyCheck.py install</code>
 
 ##Visualization module##
-How to run the visualization module. 
-Insert the visualization module in a folder/directory of an apache (or similar) server.
+How to run the visualization module.   
+Insert the visualization module in a folder/directory of an apache (or similar) server.   
 Insert the jsons created by the community ranking module in the _../visualizationModule/jsons/_ folder or let the ranking module do the work by providing the server hostIP, the path where the visualization module lies, the sshUsername and sshPassword of a user with writing priviledges.
 
-The results can be viewed via the following link:   
+The results can be viewed/used via the following link:   
 http://serverIP/pathToFolder/visualizationModule/community.html?collection=dataCollection
