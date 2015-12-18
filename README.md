@@ -9,8 +9,8 @@ The community ranking module is written in python (2.7 compatible) and can be ru
 * <code>sudo python main_vIntgrt_27.py MongoDB_hostIP collectionId timestamp_start timestamp_end visualization_hostIP visualizationModulePath sshUsername sshPassword</code> 
 
 Please keep in mind that:   
-a) If no MongoDB_hostIP is provided, then _localhost_ is used   
-b) If no dataCollection parameter is provided, then _testDataset_ is used and the demo will run.   
+a) If no MongoDB_hostIP is provided, then _'localhost'_ is used   
+b) If no dataCollection parameter is provided, then _'testDataset'_ is used and the demo will run.   
 c) If no timestamp_start/end parameters are provided, the whole dataCollection will be used.   
 d) If no visualization_hostIP, sshUsername or sshPassword are provided, they will be manually requested.
 
