@@ -9,9 +9,9 @@ The community ranking module is written in python (2.7 compatible) and can be ru
 * <code>sudo python main_vIntgrt_27.py MongoDB_hostIP collectionId timestamp_start timestamp_end visualization_hostIP visualizationModeulePath sshUsername sshPassword</code> 
 
 Please keep in mind that:   
-a) If no MongoDB_hostIP is provided, then _localhost_ is used
-b) If no dataCollection parameter is provided, then _testDataset_ is used and the demo will run.
-c) If no timestamp_start/end parameters are provided, the whole dataCollection will be used.
+a) If no MongoDB_hostIP is provided, then _localhost_ is used   
+b) If no dataCollection parameter is provided, then _testDataset_ is used and the demo will run.   
+c) If no timestamp_start/end parameters are provided, the whole dataCollection will be used.   
 d) If no visualization_hostIP, sshUsername or sshPassword are provided, they will be manually requested.
 
 The libraries required for the module to run include: _python-dateutil_, _requests_, _pymongo_,  _twython_, _numpy_ , _python-igraph_, _paramiko_, _pika_. They can either be installed manually or by running the _dependencyCheck.py_ file as follows:
