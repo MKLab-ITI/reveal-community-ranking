@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Name:
-# Purpose:       This .py file is the main Framework file
+# Purpose:       This .py file is the main Framework file 
 #                It uses a straightforward timeslot partitioning algorithm
 #
-# Required libs:
+# Required libs: 
 # Author:        konkonst
 #
 # Copyright:     (c) ITI (CERTH) 2015
@@ -16,11 +14,11 @@ import time, os, sys, socket
 try:
     import igraph
 except:
-    print("Please run the setup file to install dependencies: \">python dependencyCheck.py install\"")
+    print u"Please run the setup file to install dependencies: \">python dependencyCheck.py install\""
     # pass
-from CommunityRanking_vIntgrt import communityranking
+from CommunityRanking_vIntgrt_27 import communityranking
 #-------------------------------
-print(time.asctime( time.localtime(time.time()) ))
+print time.asctime( time.localtime(time.time()) )
 
 '''PARAMETERS'''
 # User sets mongo host
@@ -40,23 +38,23 @@ except:
 try:
     lowerTime = int(sys.argv[3])
 except:
-    lowerTime = False#(1393342340+3600*10)*1000#False#
+    lowerTime = False
     pass
 try:
     upperTime = int(sys.argv[4])
 except:
-    upperTime = False#(1393431754-3600*10)*1000#False#
+    upperTime = False
     pass
 
 try:
     jsonWritingPath = (sys.argv[5])
 except:
     jsonWritingPath = os.getcwd()
-
+    
 if not os.path.exists('./tmp/'):
-    os.makedirs('./tmp/')
+    os.makedirs('./tmp/')    
 
-print(dataCollection)
+print dataCollection
 
 t = time.time()
 
@@ -64,21 +62,23 @@ t = time.time()
 
 data = communityranking.from_json(mongoHost, dataCollection, lowerTime, upperTime)
 elapsed = time.time() - t
-print('Stage 1: %.2f seconds' % elapsed)
+print 'Stage 1: %.2f seconds' % elapsed
 
 #User sets how many timeslots back the framework should search
 prevTimeslots = 3
 dataEvol=data.evol_detect(prevTimeslots)
 del(data)
 elapsed = time.time() - t
-print('Stage 3: %.2f seconds' % elapsed)
+print 'Stage 3: %.2f seconds' % elapsed
 
-print("Ranking Commences")
+print u"Ranking Commences"
 numTopComms = 20 #how many dynamic communities to create illustrations for
 rankedCommunities = dataEvol.commRanking(numTopComms,jsonWritingPath)
 
 os.remove('./tmp/'+dataCollection+'UserDict.pck')
 
+elapsed = time.time() - t
+print 'Elapsed: %.2f seconds' % elapsed
 #send success message to rabbitMQ server
 try:
     import pika
@@ -95,13 +95,4 @@ try:
 except:
     pass
 
-import webbrowser
-try:
-    webbrowser.get('firefox').open_new_tab('file:///'+jsonWritingPath+'/Com_Graph/community.html?collection='+dataCollection)
-except:
-    getFirefox = webbrowser.get("c:/program files (x86)/mozilla firefox/firefox.exe %s &")
-    getFirefox.open_new_tab('file:///'+jsonWritingPath+'/Com_Graph/community.html?collection='+dataCollection)
-
-elapsed = time.time() - t
-print('Elapsed: %.2f seconds' % elapsed)
 

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 #-------------------------------------------------------------------------------
 # Name:
 # Purpose:       This .py file extracts adjacency lists, detects evolving communities
@@ -12,14 +11,17 @@
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
 import time, dateutil.parser, collections, pickle, random, json
-import itertools, math, requests, re, urllib.parse, concurrent.futures
+import itertools, math, requests, re, concurrent.futures
+from io import open
+from itertools import izip
+import urllib2, urllib, urlparse
 import numpy as np
 from pymongo import MongoClient
 from operator import itemgetter
-from urllib.request import urlopen
+from urllib2 import urlopen
 
 
-class communityranking:
+class communityranking(object):
     @classmethod
     def from_json(cls, mongoHost, dataCollection, lowerTime, upperTime):
 
@@ -40,8 +42,6 @@ class communityranking:
 
         '''Retrieve the json files into authors/mentions/alltime/hashtags/tweetIds/text lists'''
         for tweet in tweet_iterator:
-            # read_line = tweet.encode('utf-8')
-            # json_line = json.loads(read_line.decode('utf-8'))
             json_line = tweet
             try:
                 try:
@@ -96,57 +96,57 @@ class communityranking:
                     pass
                 totTweets += 1
             except:
-                print('bad tweet')
+                print 'bad tweet'
                 pass
         client.close()
 
         pickle.dump(userDict, open('./tmp/'+dataCollection+'UserDict.pck', 'wb'), protocol = 2)
-        zippedall=zip(alltime,tweetIds)
+        zippedall=izip(alltime,tweetIds)
         zippedall=sorted(zippedall)
-        alltime, tweetIds = zip(*zippedall)
+        alltime, tweetIds = izip(*zippedall)
         alltime, tweetIds = list(alltime), list(tweetIds)
         tweetDict['alltime'], tweetDict['tweetIds'] = alltime, tweetIds
 
-        statement = ('Total # of Tweets= ' + str(totTweets) + '\nTotal # of Tweets with mentions: ' +
-            str(totMentTws) + '\nTotal # of Tweets without mentions: ' + str(totNonMentTws) +
-            '\nTotal # of edges: ' + str(totMents) +
-            '\nTotal # of hashtags: ' + str(hashes) +
-            '\nTotal # of urls: ' + str(urlCount) +  '\n')
-        print(statement)
+        statement = ('Total # of Tweets= ' + unicode(totTweets) + '\nTotal # of Tweets with mentions: ' +
+            unicode(totMentTws) + '\nTotal # of Tweets without mentions: ' + unicode(totNonMentTws) +
+            '\nTotal # of edges: ' + unicode(totMents) +
+            '\nTotal # of hashtags: ' + unicode(hashes) +
+            '\nTotal # of urls: ' + unicode(urlCount) +  '\n')
+        print statement
 
         minTimeslotNum = 9
         timespan = alltime[-1]-alltime[0]
         timeslotRatio = timespan/minTimeslotNum
         if timeslotRatio > 2592000:
             samplingTime = 2592000
-            print('samplingTime is %s months' % (samplingTime/2592000))
+            print 'samplingTime is %s months' % (samplingTime/2592000)
         elif timeslotRatio > 604800:
             samplingTime = 604800
-            print ('samplingTime is %s weeks' % (samplingTime/604800))
+            print 'samplingTime is %s weeks' % (samplingTime/604800)
         elif timeslotRatio > 86400:
             samplingTime = 86400
-            print ('samplingTime is %s days' % (samplingTime/86400))
+            print 'samplingTime is %s days' % (samplingTime/86400)
         elif timeslotRatio > 43200:
             samplingTime = 43200
-            print ('samplingTime is %s days' % (samplingTime/86400))
+            print 'samplingTime is %s days' % (samplingTime/86400)
         elif timeslotRatio > 21600:
             samplingTime = 21600
-            print ('samplingTime is %s hours' % (samplingTime/3600))
+            print 'samplingTime is %s days' % (samplingTime/3600)
         elif timeslotRatio > 10800:
             samplingTime = 10800
-            print ('samplingTime is %s hours' % (samplingTime/3600))
+            print 'samplingTime is %s hours' % (samplingTime/3600)
         elif timeslotRatio > 3600:
             samplingTime = 3600
-            print ('samplingTime is %s hours' % (samplingTime/3600))
+            print 'samplingTime is %s hours' % (samplingTime/3600)
         elif timeslotRatio > 1800:
             samplingTime = 1800
-            print ('samplingTime is %s minutes' % (samplingTime/60))
+            print 'samplingTime is %s minutes' % (samplingTime/60)
         elif timeslotRatio > 900:
             samplingTime = 900
-            print ('samplingTime is %s minutes' % (samplingTime/60))
+            print 'samplingTime is %s minutes' % (samplingTime/60)
         else:
             samplingTime = 600
-            print ('samplingTime is %s minutes' % (samplingTime/60))
+            print 'samplingTime is %s minutes' % (samplingTime/60)
 
         return cls(alltime, tweetIds, dataCollection, samplingTime, tweetDict)
 
@@ -196,23 +196,23 @@ class communityranking:
             authors.append(self.tweetDict['tweets'][x]['authors'])
             mentions.append(self.tweetDict['tweets'][x]['user_mentions'])
         mentions = list(itertools.chain.from_iterable(mentions))
-        usrs = authors.copy()
+        usrs = list(authors)
         usrs.extend(mentions)
         usrs = list(set(usrs))
         usrs.sort()
-        self.uniqueUsers = {x:num for num,x in enumerate(usrs)}
+        self.uniqueUsers = dict((x, num) for num,x in enumerate(usrs))
 
         statement = 'Total # of unique users: %s\n' %len(self.uniqueUsers)
-        print(statement)
+        print statement
 
         #Split time according to the first derivative of the users' activity#
         sesStart, timeslot, timeLimit,commCount = 0, 0, [], 0
         self.commPgRnkBag, self.commPgRnkBagNormed, self.authorTwIdPerTmslDict = {}, {}, {}
-        print('Forming timeslots')
+        print 'Forming timeslots'
         for k in range(len(mentionLimit)):
             #make timeslot timelimit array
             timeLimit.append(self.alltime[int(mentionLimit[k])])
-            fileNum = '{0}'.format(str(timeslot).zfill(2))
+            fileNum = '{0}'.format(unicode(timeslot).zfill(2))
             sesEnd = int(mentionLimit[k] + 1)
 
             tweetTempList = self.tweetIds[sesStart:sesEnd]
@@ -227,15 +227,15 @@ class communityranking:
                 for m in self.tweetDict['tweets'][twId]['user_mentions']:
                     authors.append(self.tweetDict['tweets'][twId]['authors'])
                     mentions.append(m)
-            usersPair = list(zip(authors,mentions))
+            usersPair = list(izip(authors,mentions))
             #Create weighted adjacency list
             weighted = collections.Counter(usersPair)
             weighted = list(weighted.items())
-            adjusrs, weights = zip(*weighted)
-            adjauthors, adjments = zip(*adjusrs)
-            adjList = list(zip(adjauthors, adjments, weights))
+            adjusrs, weights = izip(*weighted)
+            adjauthors, adjments = izip(*adjusrs)
+            adjList = list(izip(adjauthors, adjments, weights))
 
-            print('For Timeslot: '+str(fileNum)+' comprising '+str(len(adjList))+' edges.')
+            print 'For Timeslot: '+unicode(fileNum)+' comprising '+unicode(len(adjList))+' edges.'
 
             self.usersPerTmsl[timeslot] = list(set(itertools.chain.from_iterable([authors,mentions])))
 
@@ -259,7 +259,8 @@ class communityranking:
                 tempUserPgRnk[k] = igraphUserPgRnk[i]#/pgRnkMax
             self.userPgRnkBag[timeslot] = tempUserPgRnk
 
-            #Detect Communities using the infomap algorithm#
+            #Detect Communities using the louvain algorithm#
+            # louvComms = gUndirected.community_multilevel(weights = 'weight')
             extractedComms = gDirected.community_infomap(edge_weights = 'weight')
             strCommDict, numCommDict, twIdCommDict = {}, {}, {}
             for k, v in enumerate(extractedComms.membership):
@@ -325,11 +326,11 @@ class communityranking:
         self.timeslots=timeslot
 
         self.timeLimit = timeLimit
-        statement = '\nTotal # of communities is '+str(commCount) + '\n'
-        print(statement)
+        statement = '\nTotal # of communities is '+unicode(commCount) + '\n'
+        print statement
 
         elapsed = time.time() - t
-        print('Stage 2 took: %.2f seconds' % elapsed)
+        print 'Stage 2 took: %.2f seconds' % elapsed
 
     def evol_detect(self, prevTimeslots):
 
@@ -369,8 +370,8 @@ class communityranking:
         # bordaCentralityBag = {}
         # for cBlen in range(timeslots):
 
-        statement = '\nTotal # of reduced communities is '+str(sum(lC)) + '\n'
-        print(statement)
+        statement = '\nTotal # of reduced communities is '+unicode(sum(lC)) + '\n'
+        print statement
         self.commPerTmslt=lC
 
         #Detect any evolution and name the evolving communities
@@ -378,10 +379,10 @@ class communityranking:
         self.commTweetBag, self.commHashtagBag, self.commTweetIdBag, self.commUrlBag = {}, {}, {}, {}
         evolcounter, uniCommIdsEvol, commCntr, dynCommCount, commIds = 0, {}, 0, 0, []
         thres = 0.3
-        print('Community similarity search...')
+        print 'Community similarity search...'
         t = time.time()
         for rows in range(1, timeslots):
-            print('...for timeslot: '+str(rows)+' of '+str(timeslots-1))
+            print '...for timeslot: '+unicode(rows)+' of '+unicode(timeslots-1)
             t2 = time.time()
             for clmns,bag1 in self.commBag[rows]['numComms'].items():
                 tempcommSize = len(bag1)
@@ -400,14 +401,14 @@ class communityranking:
                                 if sim > thres:
                                     tmpsim[clmns2] = sim
                         if tmpsim:
-                            tmpsim = {x:v+round(random.random()/10000,5) for x,v in tmpsim.items()}
+                            tmpsim = dict((x, v+round(random.random()/10000,5)) for x,v in tmpsim.items())
                             maxval = max(tmpsim.values())
                         else:
                             maxval = 0
                         if maxval >= thres:
                             dynCommCountList = []
                             for idx, val in tmpsim.items():
-                                if str(prevrow) + ',' + str(idx) not in commIds:
+                                if unicode(prevrow) + ',' + unicode(idx) not in commIds:
                                     evolcounter += 1
                                     uniCommIdsEvol[dynCommCount] = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
                                     uniCommIdsEvol[dynCommCount][0].append(prevrow)#timeslot num for first evolution
@@ -416,13 +417,13 @@ class communityranking:
                                     uniCommIdsEvol[dynCommCount][3].append(self.commBag[prevrow]['strComms'][idx])#users in each community for first evolution
                                     uniCommIdsEvol[dynCommCount][4].append(self.commBag[prevrow]['alldegree'][idx])#community degree for first evolution
                                     uniCommIdsEvol[dynCommCount][5].append(self.commPgRnkBagNormed[prevrow][idx])#normed community pagerank for first evolution
-                                    uniCommIdsEvol[dynCommCount][8].append(str(prevrow) + ',' + str(idx))#community names in between
+                                    uniCommIdsEvol[dynCommCount][8].append(unicode(prevrow) + ',' + unicode(idx))#community names in between
                                     uniCommIdsEvol[dynCommCount][9].append(self.commBag[prevrow]['commEdgesOut'][idx])
                                     uniCommIdsEvol[dynCommCount][10].append(self.commBag[prevrow]['indegree'][idx])#indegree of community
                                     uniCommIdsEvol[dynCommCount][11].append(self.commBag[prevrow]['outdegree'][idx])#outdegree of community
                                     uniCommIdsEvol[dynCommCount][12].append(self.commBag[prevrow]['reciprocity'][idx])#reciprocity of community
                                     uniCommIdsEvol[dynCommCount][13].append(self.commBag[prevrow]['commEdgesIn'][idx])
-                                    commIds.append(str(prevrow) + ',' + str(idx))
+                                    commIds.append(unicode(prevrow) + ',' + unicode(idx))
                                     dynCommCountList.append(dynCommCount)
                                     tmpTw, tmpHa, tmptwId, tmpUrl = [], [], [], []
                                     self.commTweetBag[dynCommCount], self.commHashtagBag[dynCommCount], self.commTweetIdBag[dynCommCount], self.commUrlBag[dynCommCount] = [], [], [], []
@@ -451,7 +452,7 @@ class communityranking:
                                     commCntr += 1
                                 else:
                                     for dyn, innerDict in uniCommIdsEvol.items():
-                                        if str(prevrow) + ',' + str(idx) in innerDict[8]:
+                                        if unicode(prevrow) + ',' + unicode(idx) in innerDict[8]:
                                             dynCommCountList.append(dyn)
                             for d in dynCommCountList:
                                 uniCommIdsEvol[d][0].append(rows)#timeslot num
@@ -461,13 +462,13 @@ class communityranking:
                                 uniCommIdsEvol[d][4].append(self.commBag[rows]['alldegree'][clmns])#community degree per timeslot
                                 uniCommIdsEvol[d][5].append(self.commPgRnkBagNormed[rows][clmns])#normed community pagerank per timeslot
                                 uniCommIdsEvol[d][7].append(val)#similarity between the two communities in evolving timesteps
-                                uniCommIdsEvol[d][8].append(str(rows) + ',' + str(clmns))#community names in between
+                                uniCommIdsEvol[d][8].append(unicode(rows) + ',' + unicode(clmns))#community names in between
                                 uniCommIdsEvol[d][9].append(self.commBag[rows]['commEdgesOut'][clmns])
                                 uniCommIdsEvol[d][10].append(self.commBag[rows]['indegree'][clmns])#indegree of community
                                 uniCommIdsEvol[d][11].append(self.commBag[rows]['outdegree'][clmns])#outdegree of community
                                 uniCommIdsEvol[d][12].append(self.commBag[rows]['reciprocity'][clmns])#reciprocity of community
                                 uniCommIdsEvol[d][13].append(self.commBag[rows]['commEdgesIn'][clmns])
-                                commIds.append(str(rows) + ',' + str(clmns))
+                                commIds.append(unicode(rows) + ',' + unicode(clmns))
                                 tmpTw, tmpHa, tmptwId, tmpUrl = [], [], [], []
                                 for twId in self.commBag[rows]['tweetIds'][clmns]:
                                     try:
@@ -493,35 +494,35 @@ class communityranking:
                                 commCntr += 1
                             break
             elapsed = time.time() - t2
-            print('Elapsed: %.2f seconds' % elapsed)
+            print 'Elapsed: %.2f seconds' % elapsed
         uniCommIds = list(uniCommIdsEvol.keys())
         uniCommIds.sort()
 
         elapsed = time.time() - t
-        print('Elapsed: %.2f seconds' % elapsed)
+        print 'Elapsed: %.2f seconds' % elapsed
 
         self.uniCommIds,self.uniCommIdsEvol=uniCommIds,uniCommIdsEvol
 
         del(commIds,self.alltime,commSizeBag)#,self.commPgRnkBag,self.commBag,)
 
-        statement = (str(evolcounter) + ' evolutions and ' + str(len(uniCommIds)) + ' dynamic communities and ' + str(commCntr)+' evolving communities' + '\n')
-        print(statement)
+        statement = (unicode(evolcounter) + ' evolutions and ' + unicode(len(uniCommIds)) + ' dynamic communities and ' + unicode(commCntr)+' evolving communities' + '\n')
+        print statement
         return self
 
     def commRanking(self,numTopComms,jsonWritingPath):
         import twython, nltk
         from nltk.corpus import stopwords
 
-        regex1 = re.compile("(?:\@|#|https?\://)\S+",re.UNICODE)
-        regex2 = re.compile("\w+'?\w+",re.UNICODE)
+        regex1 = re.compile(u"(?:\@|#|https?\://)\S+",re.UNICODE)
+        regex2 = re.compile(u"\w+'?\w+",re.UNICODE)
 
         uniCommIdsEvol=self.uniCommIdsEvol
         timeslots=self.timeslots
 
-        print('Extracting and fusing dynamic community feature vector')
+        print 'Extracting and fusing dynamic community feature vector'
         tempcommRanking = {}
         definiteStop = ['gt','amp','rt','via']
-        commRanking, rankingDict, lifetime, simpleEntropyDict = {}, {},0, {}
+        commRanking, rankingDict, lifetime, simpleEntropyDict, bigramEntropyDict = {}, {},0, {}, {}
         for Id in self.uniCommIds:
             rankingDict[Id] = {}
             uniqueTimeSlLen = len(set(uniCommIdsEvol[Id][0]))
@@ -530,7 +531,7 @@ class communityranking:
             '''text entropy extraction'''
             tmptextlist = [[i for i in regex2.findall(regex1.sub('',' '.join(x).lower())) if i and not i.startswith(('rt','htt','(@','\'@','t.co')) and len(i)>2 and i not in definiteStop] for x in self.commTweetBag[Id]]
             simpleEntropyDict[Id] = [myentropy(x) for x in tmptextlist]
-            rankingDict[Id]['theseus'] = 1+len(set(uniCommIdsEvol[Id][3][0]).intersection(uniCommIdsEvol[Id][3][-1]))
+
             rankingDict[Id]['textentropy'] = sum(simpleEntropyDict[Id])/timeSlLen
             rankingDict[Id]['size'] = sum(uniCommIdsEvol[Id][2]) / uniqueTimeSlLen
             rankingDict[Id]['persistence'] = uniqueTimeSlLen / timeslots #persistence)
@@ -540,19 +541,17 @@ class communityranking:
             rankingDict[Id]['commMaxCentralityNormed'] = max(uniCommIdsEvol[Id][5]) #max normed commCentrality
             rankingDict[Id]['connections'] = sum([len(y) for y in [set(x) for x in uniCommIdsEvol[Id][9]]])/ uniqueTimeSlLen #connections to other communities
             rankingDict[Id]['urlAvg'] = sum([len(set(y)) for y in self.commUrlBag[Id]]) / uniqueTimeSlLen #average number of unique urls in every community
-            rankingDict[Id]['similarityAvg'] = sum(uniCommIdsEvol[Id][7]) / uniqueTimeSlLen #average jaccardian between timeslots for each dyn comm
-
+ 
         '''Comms ranked in order of features'''
         rankedPerstability = sorted(rankingDict, key=lambda k: [rankingDict[Id]['perstability'],rankingDict[k]['connections'],rankingDict[k]['commCentralityNormed']], reverse = True)
         rankedcommCentralityNormed = sorted(rankingDict, key=lambda k: [rankingDict[k]['commCentralityNormed'],rankingDict[k]['commMaxCentralityNormed'],rankingDict[k]['size']], reverse = True)
         rankedcommSize = sorted(rankingDict, key=lambda k: [rankingDict[k]['size'],rankingDict[k]['connections'],rankingDict[k]['commCentralityNormed']], reverse = True)
         rankedtextentropy = sorted(rankingDict, key=lambda k: [rankingDict[k]['textentropy'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
         rankedUrlAvg = sorted(rankingDict, key=lambda k: [rankingDict[k]['urlAvg'],rankingDict[k]['size'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
-        rankedTheseus = sorted(rankingDict, key=lambda k: [rankingDict[k]['theseus'],rankingDict[k]['similarityAvg'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
         
         commRanking = {}
         for Id in self.uniCommIds:
-            commRanking[Id] = recRank([rankedUrlAvg.index(Id),rankedtextentropy.index(Id),rankedPerstability.index(Id),rankedcommCentralityNormed.index(Id),rankedcommSize.index(Id),rankedTheseus.index(Id)])
+            commRanking[Id] = recRank([rankedUrlAvg.index(Id),rankedtextentropy.index(Id),rankedPerstability.index(Id),rankedcommCentralityNormed.index(Id),rankedcommSize.index(Id)])
 
         self.rankingDict = rankingDict
 
@@ -562,7 +561,7 @@ class communityranking:
             numTopComms = len(rankedCommunities)
 
         '''Fix url dictionary'''
-        print('Fixing urls...')
+        print 'Fixing urls...'
         self.urlDictionaryUpdate(rankedCommunities[0:numTopComms])
 
         '''Set up twitter api to retrieve profile images from usernames'''
@@ -575,12 +574,12 @@ class communityranking:
         self.usernameProfPicDict = {}
 
         '''Create corpus and stopwords'''
-        try:
-            stopW = stopwords.words('english')
-        except:
-            nltk.download('stopwords')
-            stopW = stopwords.words('english')
-            pass
+    	try:
+    		stopW = stopwords.words('english')
+    	except:
+    		nltk.download('stopwords')
+    		stopW = stopwords.words('english')
+    		pass
         if self.dataCollection.startswith('greek'):
             session = requests.Session()
             grstopwords = session.get('https://www.dropbox.com/s/d6rvcmfu6c5jlsp/greek_stopwords.txt?raw=1').content.decode('ISO-8859-7').split('\r\n')
@@ -595,7 +594,7 @@ class communityranking:
         jsondata['ranked_communities'] = []
         jsondata['datasetInfo'] = {'allTimeslots':self.timeLimit}
 
-        print('Building ranked community metadata structure')
+        print 'Building ranked community metadata structure'
         rankedCommunitiesFinal = {}
         bigramEntropy = {}
         allRankedCommunitySizes, allRankedCommunityCentralities, allRankedCommunityConnections = [], [] , []
@@ -603,27 +602,27 @@ class communityranking:
         for rank, rcomms in enumerate(rankedCommunities[:numTopComms]):
 
             tmslUsrsCentral, tmslUsrsProfPics, hashtagList, keywordList, bigramList, tmptweetids, commTwText, urlList, domainList, topic, tmpkeywrds = [], [], [], [], [], [], [], [], [], [], []
-            strRank = str(rank)#'{0}'.format(str(rank).zfill(2))
+            strRank = unicode(rank)#'{0}'.format(str(rank).zfill(2))
             rankedCommunitiesFinal[strRank] = [rcomms]
             rankedCommunitiesFinal[strRank].append(commRanking[rcomms])
             # rankedCommunitiesFinal[strRank].append(uniCommIdsEvol[rcomms][3])
             timeSlotApp = [self.timeLimit[x] for x in uniCommIdsEvol[rcomms][0]]
 
-            timeStmp_Centrality_Dict = {str(k):0 for k in self.timeLimit}
-            communitySizePerSlot = {str(k):0 for k in self.timeLimit}
-            communityEdgesPerSlot = {str(k):0 for k in self.timeLimit}
-            communityKeywordsPerSlot = {str(k):[] for k in self.timeLimit}
-            communityBigramsPerSlot = {str(k):[] for k in self.timeLimit}
-            communityTagsPerSlot = {str(k):[] for k in self.timeLimit}
-            communityUrlsPerSlot = {str(k):[] for k in self.timeLimit}
-            communityDomainsPerSlot = {str(k):[] for k in self.timeLimit}
-            communityTweetsPerSlot = {str(k):[] for k in self.timeLimit}
-            usersCentralityPerSlot = {str(k):[] for k in self.timeLimit}
+            timeStmp_Centrality_Dict = dict((unicode(k), 0) for k in self.timeLimit)
+            communitySizePerSlot = dict((unicode(k), 0) for k in self.timeLimit)
+            communityEdgesPerSlot = dict((unicode(k), 0) for k in self.timeLimit)
+            communityKeywordsPerSlot = dict((unicode(k), []) for k in self.timeLimit)
+            communityBigramsPerSlot = dict((unicode(k), []) for k in self.timeLimit)
+            communityTagsPerSlot = dict((unicode(k), []) for k in self.timeLimit)
+            communityUrlsPerSlot = dict((unicode(k), []) for k in self.timeLimit)
+            communityDomainsPerSlot = dict((unicode(k), []) for k in self.timeLimit)
+            communityTweetsPerSlot = dict((unicode(k), []) for k in self.timeLimit)
+            usersCentralityPerSlot = dict((unicode(k), []) for k in self.timeLimit)
 
             allRankedCommunitySizes.extend(uniCommIdsEvol[rcomms][2])
             allRankedCommunityCentralities.extend(uniCommIdsEvol[rcomms][5])
 
-            commUserDict = {k:[] for k in range(len(self.timeLimit))}
+            commUserDict = dict((k, []) for k in range(len(self.timeLimit)))
 
             # print('Building json for dynComm: '+str(rcomms)+' ranked '+str(strRank)+' via value '+str(commRanking[rcomms]))
 
@@ -631,9 +630,9 @@ class communityranking:
 
                 if tmsl>0 and uniCommIdsEvol[rcomms][0][tmsl] == uniCommIdsEvol[rcomms][0][tmsl-1] and uniCommIdsEvol[rcomms][2][tmsl] < uniCommIdsEvol[rcomms][2][tmsl-1]:
                     continue#ensure that the community with the biggest size goes to print...
-                timeStmp_Centrality_Dict[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = uniCommIdsEvol[rcomms][5][tmsl]
+                timeStmp_Centrality_Dict[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = uniCommIdsEvol[rcomms][5][tmsl]
 
-                communitySizePerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = uniCommIdsEvol[rcomms][2][tmsl]
+                communitySizePerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = uniCommIdsEvol[rcomms][2][tmsl]
 
                 '''tmp script for edge computation. normally it would result straight from the extraction def'''
                 lines = self.adjListBag[uniCommIdsEvol[rcomms][0][tmsl]]
@@ -641,15 +640,15 @@ class communityranking:
                 for l in lines:
                     if l[0] in users and l[1] in users:
                         tmpNumEdges += int(l[2])
-                communityEdgesPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpNumEdges
+                communityEdgesPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpNumEdges
                 allRankedCommunityConnections.append(tmpNumEdges)
 
                 tmpHashtagBag = self.commHashtagBag[rcomms][tmsl]#hashtags for only this slot
                 if tmpHashtagBag:
                     tmppopHashtags = [x.lower() for x in tmpHashtagBag]
                     tmppopHashtags = collections.Counter(tmppopHashtags)
-                    communityTagsPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = comm_tfidf(tmppopHashtags,idfHashtag,10)
-                    allHashtagValues.extend([x[1] for x in communityTagsPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])]])
+                    communityTagsPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = comm_tfidf(tmppopHashtags,idfHashtag,10)
+                    allHashtagValues.extend([x[1] for x in communityTagsPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])]])
                 else:
                     tmppopHashtags = {}
 
@@ -659,15 +658,15 @@ class communityranking:
                 if tmpURLBagAll:
                     # tmppopUrls = [x for x in list(itertools.chain.from_iterable(tmpURLBag))]
                     tmpURLBag = collections.Counter(tmpURLBagAll)
-                    communityUrlsPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpURLBag.most_common(10)
+                    communityUrlsPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpURLBag.most_common(10)
                 else:
                     tmpURLBag = {}
 
-                tmpDomainBagAll = [urllib.parse.urlparse(x).netloc.lower() for x in self.commUrlBag[rcomms][tmsl] if x]#urls for only this slot
+                tmpDomainBagAll = [urlparse.urlparse(x).netloc.lower() for x in self.commUrlBag[rcomms][tmsl] if x]#urls for only this slot
                 if tmpDomainBagAll:
                     # tmppopUrls = [x for x in list(itertools.chain.from_iterable(tmpURLBag))]
                     tmpDomainBag = collections.Counter(tmpDomainBagAll)
-                    communityDomainsPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpDomainBag.most_common(10)
+                    communityDomainsPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpDomainBag.most_common(10)
                 else:
                     tmpDomainBag = {}
 
@@ -686,25 +685,26 @@ class communityranking:
                         try:
                             output = mytwitter.lookup_user(screen_name=comma_separated_string)
                             for user in output:
-                                self.usernameProfPicDict[user['screen_name'].lower()] = user
+                                self.usernameProfPicDict[user['screen_name']] = user['profile_image_url'].replace('_normal','')
                             eror = 'ok'
-                        except twython.exceptions.TwythonError as er:
-                            eror = str(er)
+                        except twython.exceptions.TwythonError, er:
+                            eror = unicode(er)
                             if '429' in eror:
-                                print('delaying for batch api...')
+                                print 'delaying for batch api...'
                                 time.sleep(5*60+2)
                             pass
+
                 uscentr = []
                 for us in users:
                     uscentr.append([us, self.userPgRnkBag[uniCommIdsEvol[rcomms][0][tmsl]][us]])
                 uscentr = sorted(uscentr, key=itemgetter(1), reverse=True)
-                usersCentralityPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = uscentr[:10]
+                usersCentralityPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = uscentr[:10]
                 allCentralityValues.extend([x[1] for x in uscentr[:10]])
 
                 tmptweetText = [' '.join([i for i in regex2.findall(regex1.sub('',x.lower())) if i and not i.startswith(('rt','htt','t.co')) and i not in definiteStop]) for x in self.commTweetBag[rcomms][tmsl]]
                 tmptweetText = [x for x in tmptweetText if x]
                 popTweets = collections.Counter(tmptweetText)
-                communityTweetsPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = popTweets.most_common(10)
+                communityTweetsPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = popTweets.most_common(10)
 
                 #topic extraction
                 tmptweetText2 = [[i for i in regex2.findall(x) if i not in stopW] for x in set(tmptweetText)]# if x not in seen and not seen_add(x)]
@@ -724,10 +724,10 @@ class communityranking:
                 timeSlLen=len(uniCommIdsEvol[Id][0])
                 tmpTopic=comm_tfidf(topicListCounted,idf,10)
                 allKeywordValues.extend([x[1] for x in tmpTopic])
-                communityKeywordsPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpTopic
+                communityKeywordsPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpTopic
                 tmpBigrams=comm_tfidf(topicBigramsCounted,idfBigram,10)
                 allBigramValues.extend([x[1] for x in tmpBigrams])
-                communityBigramsPerSlot[str(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpBigrams
+                communityBigramsPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = tmpBigrams
 
                 keywordList.append(list(topicListCounted.keys()))
                 bigramList.append(list(topicBigramsCounted.keys()))
@@ -776,17 +776,17 @@ class communityranking:
                 popBigrams=comm_tfidf(popBigrams,idfBigram,10)
 
             dyccoDict = [{
-            'timestamp':str(k),
-            'commCentrality':timeStmp_Centrality_Dict[str(k)],
-            'commSize':communitySizePerSlot[str(k)],
-            'commKeywords':communityKeywordsPerSlot[str(k)],
-            'connectionsNum':communityEdgesPerSlot[str(k)],
-            'communityBigramsPerSlot':communityBigramsPerSlot[str(k)],
-            'usersCentrality':usersCentralityPerSlot[str(k)],
-            'commHashTags':communityTagsPerSlot[str(k)],
-            'commUrls':communityUrlsPerSlot[str(k)],
-            'commDomains':communityDomainsPerSlot[str(k)],
-            'commTweets':communityTweetsPerSlot[str(k)]} for k in self.timeLimit]
+            'timestamp':unicode(k),
+            'commCentrality':timeStmp_Centrality_Dict[unicode(k)],
+            'commSize':communitySizePerSlot[unicode(k)],
+            'commKeywords':communityKeywordsPerSlot[unicode(k)],
+            'connectionsNum':communityEdgesPerSlot[unicode(k)],
+            'communityBigramsPerSlot':communityBigramsPerSlot[unicode(k)],
+            'usersCentrality':usersCentralityPerSlot[unicode(k)],
+            'commHashTags':communityTagsPerSlot[unicode(k)],
+            'commUrls':communityUrlsPerSlot[unicode(k)],
+            'commDomains':communityDomainsPerSlot[unicode(k)],
+            'commTweets':communityTweetsPerSlot[unicode(k)]} for k in self.timeLimit]
 
             self.buildDynCommGraphFiles(strRank, commUserDict,jsonWritingPath)
 
@@ -806,23 +806,23 @@ class communityranking:
         allRankedCommunitySizes.sort()
         allRankedCommunityCentralities.sort()
         allRankedCommunityConnections.sort()
-
-        try:
+    	
+    	try:
             minCtlVal = min([x for x in set(allCentralityValues) if x!=0])
-        except:
-            minCtlVal = 1
-        try:
-                minBgmVal = min([x for x in set(allBigramValues) if x!=0])
-        except:
-            minBgmVal = 1
-        try:
+    	except:
+    		minCtlVal = 1
+    	try:
+            minBgmVal = min([x for x in set(allBigramValues) if x!=0])
+    	except:
+    		minBgmVal = 1
+    	try:
             minKwdVal = min([x for x in set(allKeywordValues) if x!=0])
-        except:
-            minKwdVal = 1
-        try:
+    	except:
+    		minKwdVal = 1
+    	try:
             minHtgVal = min([x for x in set(allHashtagValues) if x!=0])
-        except:
-            minHtgVal = 1
+    	except:
+    		minHtgVal = 1
 
         for idx in range(numTopComms):
             for idx2 in range(timeslots):
@@ -846,11 +846,11 @@ class communityranking:
         fixed - centrality accuracy in digits
         '''
         webDrawFile = open(jsonWritingPath+'/Com_Graph/jsons/'+self.dataCollection+'communities.json', 'w')
-        webDrawFile.write(json.dumps(jsondata, sort_keys=True))
+        webDrawFile.write(unicode(json.dumps(jsondata, sort_keys=True)))
         webDrawFile.close()
 
     def buildDynCommGraphFiles(self, strRank, commUserDict,jsonWritingPath):
-        print('Creating a json containing the graphs for dynamic community: '+str(int(strRank)+1))
+        print 'Creating a json containing the graphs for dynamic community: '+unicode(int(strRank)+1)
         '''make and save dynamic community json files'''
 
         allUsers = list(set(itertools.chain.from_iterable(list(commUserDict.values()))))
@@ -883,24 +883,24 @@ class communityranking:
                 # tmpNumEdges = 0
                 for l in lines:
                     if l[0] in commUserDict[tmsl] and l[1] in commUserDict[tmsl] and l[0]!=l[1]:
-                        tmpConnections.append(l[0]+';'+l[1]+';'+str(l[2]))
+                        tmpConnections.append(l[0]+';'+l[1]+';'+unicode(l[2]))
                 jsondata['connections'].append({'timestamp_connections':tmpConnections})
             else:
                 jsondata['connections'].append({'timestamp_connections':[]})
 
-        webDrawDataFile = open(jsonWritingPath+'/Com_Graph/jsons/'+self.dataCollection+'users' + str(int(strRank)+1) +'.json', 'w')
-        webDrawDataFile.write(json.dumps(jsondata, sort_keys=True))#,ensure_ascii=False).replace('\u200f',''))
+        webDrawDataFile = open(jsonWritingPath+'/Com_Graph/jsons/'+self.dataCollection+'users' + unicode(int(strRank)+1) +'.json', 'w')
+        webDrawDataFile.write(unicode(json.dumps(jsondata, sort_keys=True)))
         webDrawDataFile.close()
 
     def corpusExtraction(self,stopW):
         from math import log
         import nltk
 
-        print('Extracting dataset corpus')
+        print 'Extracting dataset corpus'
 
         textList, bigramList = [], []
-        regex1 = re.compile("(?:\@|#|https?\://)\S+",re.UNICODE)
-        regex2 = re.compile("\w+'?\w+",re.UNICODE)
+        regex1 = re.compile(u"(?:\@|#|https?\://)\S+",re.UNICODE)
+        regex2 = re.compile(u"\w+'?\w+",re.UNICODE)
 
         for k,v in self.commTweetBag.items():
             bagitems = [regex2.findall(regex1.sub('',' '.join(list(set(x))).lower())) for x in v]
@@ -920,9 +920,9 @@ class communityranking:
         for bigr in set(allBigrams):
             dictBigramTokens[bigr]=log(textListLength/(1+countAllBigrams[bigr]))
 
-        print('Extracted %s words and %s bigrams' %(len(dictTokens),len(dictBigramTokens)))
+        print 'Extracted %s words and %s bigrams' %(len(dictTokens),len(dictBigramTokens))
 
-        print('Extracting hashtag corpus')
+        print 'Extracting hashtag corpus'
         fullList = []
         for k,v in self.commHashtagBag.items():
             listofcomms = [set([y.lower() for y in x if len(y)>2]) for x in v]
@@ -937,10 +937,10 @@ class communityranking:
                     wordCount+=1
             hashTagTokens[word]=log(len(fullList)/(1+wordCount))
 
-        print('Extracted %s hashtags' %len(hashTagTokens))
+        print 'Extracted %s hashtags' %len(hashTagTokens)
 
         return dictTokens, dictBigramTokens, hashTagTokens
-
+        
 
     def urlDictionaryUpdate(self,rankedCommunities):
 
@@ -1019,7 +1019,7 @@ def myentropy(data):
 #----------------------------------------------------
 #tfidf module
 def comm_tfidf(topicList,idfDict,topWordsNum):
-    scores = {word: tfidf(word, topicList, idfDict) for word in topicList}
+    scores = dict((word, tfidf(word, topicList, idfDict)) for word in topicList)
     word_ranking = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     myDict=word_ranking[:topWordsNum]
     return myDict
@@ -1055,7 +1055,7 @@ def load_url(url, timeout):
 
 def unshrinkUrlsInParallel(urlArray):
 
-    print('unshortenCommUrlsFromPickles.py:')
+    print 'unshortenCommUrlsFromPickles.py:'
 
     #parameters
     parallelUrls = 40
@@ -1068,18 +1068,18 @@ def unshrinkUrlsInParallel(urlArray):
 
     for i in range(2):
         if i:
-            print('Repassing to ensure full unshortening')
-        shorts = [x for x in list(urlArray.keys()) if (not urlArray[x]['trueUrl'] or len(urlArray[x]['trueUrl'])<=30 or urllib.parse.urlparse(urlArray[x]['trueUrl']).netloc.lower() in shrinkedUrls) and 'ow.ly/i/' not in urlArray[x]['trueUrl']]
-
+            print 'Repassing to ensure full unshortening'
+        shorts = [x for x in list(urlArray.keys()) if (not urlArray[x]['trueUrl'] or len(urlArray[x]['trueUrl'])<=30 or urlparse.urlparse(urlArray[x]['trueUrl']).netloc.lower() in shrinkedUrls) and 'ow.ly/i/' not in urlArray[x]['trueUrl']]
+        
         batchShorts = [shorts[x:x+parallelUrls] for x in range(0, len(shorts), parallelUrls)]
 
         urlLength = len(batchShorts)
-        print('There are %d batches of %d urls' %(urlLength,parallelUrls))
+        print 'There are %d batches of %d urls' %(urlLength,parallelUrls)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=maxworkers) as executor:
             for idx,tmpshorts in enumerate(batchShorts):
                 # Start the load operations and mark each future with its URL
-                future_to_url = {executor.submit(load_url, url, timeOut): url for url in tmpshorts}
+                future_to_url = dict((executor.submit(load_url, url, timeOut), url) for url in tmpshorts)
                 try:
                     for future in concurrent.futures.as_completed(future_to_url, timeout=60):
                         thisUrl = future_to_url[future]
@@ -1087,7 +1087,7 @@ def unshrinkUrlsInParallel(urlArray):
                         if trueUrl and thisUrl!=trueUrl:
                             urlArray[thisUrl]['trueUrl'] = trueUrl
                 except concurrent.futures._base.TimeoutError:
-                    print('error in futures')
+                    print 'error in futures'
                     for thisUrl in tmpshorts:
                         if urlArray[thisUrl]['trueUrl']:
                             trueUrl = load_url(thisUrl, timeOut)
@@ -1097,6 +1097,6 @@ def unshrinkUrlsInParallel(urlArray):
                 if not trueUrl:
                     urlArray[thisUrl]['trueUrl'] = thisUrl
                 if not idx%20:
-                    print('@@@@@ Just passed batch '+str(idx)+' at '+time.strftime("%H:%M||%d/%m "))
+                    print '@@@@@ Just passed batch '+unicode(idx)+' at '+time.strftime(u"%H:%M||%d/%m ")
     return urlArray
 #----------------------------------------------------
