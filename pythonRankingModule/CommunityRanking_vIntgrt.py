@@ -530,6 +530,7 @@ class communityranking:
             '''text entropy extraction'''
             tmptextlist = [[i for i in regex2.findall(regex1.sub('',' '.join(x).lower())) if i and not i.startswith(('rt','htt','(@','\'@','t.co')) and len(i)>2 and i not in definiteStop] for x in self.commTweetBag[Id]]
             simpleEntropyDict[Id] = [myentropy(x) for x in tmptextlist]
+            
             rankingDict[Id]['theseus'] = 1+len(set(uniCommIdsEvol[Id][3][0]).intersection(uniCommIdsEvol[Id][3][-1]))
             rankingDict[Id]['textentropy'] = sum(simpleEntropyDict[Id])/timeSlLen
             rankingDict[Id]['size'] = sum(uniCommIdsEvol[Id][2]) / uniqueTimeSlLen
@@ -845,9 +846,8 @@ class communityranking:
         conmax - max num of connections/edges
         fixed - centrality accuracy in digits
         '''
-        webDrawFile = open(jsonWritingPath+'/Com_Graph/jsons/'+self.dataCollection+'communities.json', 'w')
-        webDrawFile.write(json.dumps(jsondata, sort_keys=True))
-        webDrawFile.close()
+        with open('./tmp/'+self.dataCollection+'communities.json', 'w') as webDrawFile:
+            webDrawFile.write(json.dumps(jsondata, sort_keys=True))
 
     def buildDynCommGraphFiles(self, strRank, commUserDict,jsonWritingPath):
         print('Creating a json containing the graphs for dynamic community: '+str(int(strRank)+1))
@@ -888,9 +888,8 @@ class communityranking:
             else:
                 jsondata['connections'].append({'timestamp_connections':[]})
 
-        webDrawDataFile = open(jsonWritingPath+'/Com_Graph/jsons/'+self.dataCollection+'users' + str(int(strRank)+1) +'.json', 'w')
-        webDrawDataFile.write(json.dumps(jsondata, sort_keys=True))#,ensure_ascii=False).replace('\u200f',''))
-        webDrawDataFile.close()
+        with open('./tmp/'+self.dataCollection+'users' + str(int(strRank)+1) +'.json', 'w') as webDrawDataFile:
+            webDrawDataFile.write(json.dumps(jsondata, sort_keys=True))#,ensure_ascii=False).replace('\u200f',''))
 
     def corpusExtraction(self,stopW):
         from math import log

@@ -532,6 +532,7 @@ class communityranking(object):
             tmptextlist = [[i for i in regex2.findall(regex1.sub('',' '.join(x).lower())) if i and not i.startswith(('rt','htt','(@','\'@','t.co')) and len(i)>2 and i not in definiteStop] for x in self.commTweetBag[Id]]
             simpleEntropyDict[Id] = [myentropy(x) for x in tmptextlist]
 
+            rankingDict[Id]['theseus'] = 1+len(set(uniCommIdsEvol[Id][3][0]).intersection(uniCommIdsEvol[Id][3][-1]))
             rankingDict[Id]['textentropy'] = sum(simpleEntropyDict[Id])/timeSlLen
             rankingDict[Id]['size'] = sum(uniCommIdsEvol[Id][2]) / uniqueTimeSlLen
             rankingDict[Id]['persistence'] = uniqueTimeSlLen / timeslots #persistence)
@@ -541,6 +542,7 @@ class communityranking(object):
             rankingDict[Id]['commMaxCentralityNormed'] = max(uniCommIdsEvol[Id][5]) #max normed commCentrality
             rankingDict[Id]['connections'] = sum([len(y) for y in [set(x) for x in uniCommIdsEvol[Id][9]]])/ uniqueTimeSlLen #connections to other communities
             rankingDict[Id]['urlAvg'] = sum([len(set(y)) for y in self.commUrlBag[Id]]) / uniqueTimeSlLen #average number of unique urls in every community
+            rankingDict[Id]['similarityAvg'] = sum(uniCommIdsEvol[Id][7]) / uniqueTimeSlLen #average jaccardian between timeslots for each dyn comm
  
         '''Comms ranked in order of features'''
         rankedPerstability = sorted(rankingDict, key=lambda k: [rankingDict[Id]['perstability'],rankingDict[k]['connections'],rankingDict[k]['commCentralityNormed']], reverse = True)
@@ -548,10 +550,11 @@ class communityranking(object):
         rankedcommSize = sorted(rankingDict, key=lambda k: [rankingDict[k]['size'],rankingDict[k]['connections'],rankingDict[k]['commCentralityNormed']], reverse = True)
         rankedtextentropy = sorted(rankingDict, key=lambda k: [rankingDict[k]['textentropy'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
         rankedUrlAvg = sorted(rankingDict, key=lambda k: [rankingDict[k]['urlAvg'],rankingDict[k]['size'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
+        rankedTheseus = sorted(rankingDict, key=lambda k: [rankingDict[k]['theseus'],rankingDict[k]['similarityAvg'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
         
         commRanking = {}
         for Id in self.uniCommIds:
-            commRanking[Id] = recRank([rankedUrlAvg.index(Id),rankedtextentropy.index(Id),rankedPerstability.index(Id),rankedcommCentralityNormed.index(Id),rankedcommSize.index(Id)])
+            commRanking[Id] = recRank([rankedUrlAvg.index(Id),rankedtextentropy.index(Id),rankedPerstability.index(Id),rankedcommCentralityNormed.index(Id),rankedcommSize.index(Id),rankedTheseus.index(Id)])
 
         self.rankingDict = rankingDict
 
@@ -845,9 +848,8 @@ class communityranking(object):
         conmax - max num of connections/edges
         fixed - centrality accuracy in digits
         '''
-        webDrawFile = open(jsonWritingPath+'/Com_Graph/jsons/'+self.dataCollection+'communities.json', 'w')
-        webDrawFile.write(unicode(json.dumps(jsondata, sort_keys=True)))
-        webDrawFile.close()
+        with open('./tmp/'+self.dataCollection+'communities.json', 'w') as webDrawFile:
+            webDrawFile.write(json.dumps(jsondata, sort_keys=True))
 
     def buildDynCommGraphFiles(self, strRank, commUserDict,jsonWritingPath):
         print 'Creating a json containing the graphs for dynamic community: '+unicode(int(strRank)+1)
@@ -888,9 +890,8 @@ class communityranking(object):
             else:
                 jsondata['connections'].append({'timestamp_connections':[]})
 
-        webDrawDataFile = open(jsonWritingPath+'/Com_Graph/jsons/'+self.dataCollection+'users' + unicode(int(strRank)+1) +'.json', 'w')
-        webDrawDataFile.write(unicode(json.dumps(jsondata, sort_keys=True)))
-        webDrawDataFile.close()
+        with open('./tmp/'+self.dataCollection+'users' + unicode(int(strRank)+1) +'.json', 'w') as webDrawDataFile:
+            webDrawDataFile.write(unicode(json.dumps(jsondata, sort_keys=True)))
 
     def corpusExtraction(self,stopW):
         from math import log
