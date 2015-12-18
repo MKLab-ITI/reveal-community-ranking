@@ -509,7 +509,7 @@ class communityranking(object):
         print statement
         return self
 
-    def commRanking(self,numTopComms,jsonWritingPath):
+    def commRanking(self,numTopComms):
         import twython, nltk
         from nltk.corpus import stopwords
 
@@ -688,7 +688,7 @@ class communityranking(object):
                         try:
                             output = mytwitter.lookup_user(screen_name=comma_separated_string)
                             for user in output:
-                                self.usernameProfPicDict[user['screen_name']] = user['profile_image_url'].replace('_normal','')
+                                self.usernameProfPicDict[user['screen_name']] = user
                             eror = 'ok'
                         except twython.exceptions.TwythonError, er:
                             eror = unicode(er)
@@ -791,7 +791,7 @@ class communityranking(object):
             'commDomains':communityDomainsPerSlot[unicode(k)],
             'commTweets':communityTweetsPerSlot[unicode(k)]} for k in self.timeLimit]
 
-            self.buildDynCommGraphFiles(strRank, commUserDict,jsonWritingPath)
+            self.buildDynCommGraphFiles(strRank, commUserDict)
 
             jsondycco={
             'communityLabels': uniCommIdsEvol[rcomms][8],
@@ -849,9 +849,9 @@ class communityranking(object):
         fixed - centrality accuracy in digits
         '''
         with open('./tmp/'+self.dataCollection+'communities.json', 'w') as webDrawFile:
-            webDrawFile.write(json.dumps(jsondata, sort_keys=True))
+            webDrawFile.write(unicode(json.dumps(jsondata, sort_keys=True)))
 
-    def buildDynCommGraphFiles(self, strRank, commUserDict,jsonWritingPath):
+    def buildDynCommGraphFiles(self, strRank, commUserDict):
         print 'Creating a json containing the graphs for dynamic community: '+unicode(int(strRank)+1)
         '''make and save dynamic community json files'''
 
