@@ -26,7 +26,7 @@ The results can be viewed/used via the following link:
 http://serverIP/pathToFolder/visualizationModule/community.html?collection=dataCollection
 
 ###Debugging Instructions###
-_notes to possible errors when installing igraph on linux:_
+_notes to possible errors when installing igraph on linux:_   
 If you find yourself facing a <code>Could not download and compile the C core of igraph</code> error. Follow the following instructions:
 
 Add the Launchpad repository of igraph to apt:
