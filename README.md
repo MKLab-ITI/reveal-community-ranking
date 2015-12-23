@@ -24,3 +24,13 @@ Insert the jsons created by the community ranking module in the _../visualizatio
 
 The results can be viewed/used via the following link:   
 http://serverIP/pathToFolder/visualizationModule/community.html?collection=dataCollection
+
+###Debugging Instructions###
+_notes to possible errors when installing igraph on linux:_
+If you find yourself facing a <code>Could not download and compile the C core of igraph</code> error. Follow the following instructions:
+
+Add the Launchpad repository of igraph to apt:
+<code>sudo add-apt-repository ppa:igraph/ppa</code>
+Then update your package database and install the python-igraph package:
+<code>sudo apt-get update</code>
+<code>sudo apt-get install python-igraph</code>
