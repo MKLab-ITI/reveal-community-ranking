@@ -30,7 +30,7 @@ _notes to possible errors when installing igraph on linux:_
 If you find yourself facing a <code>Could not download and compile the C core of igraph</code> error. Follow the following instructions:
 
 Add the Launchpad repository of igraph to apt:   
-<code>sudo add-apt-repository ppa:igraph/ppa</code>
+<code>sudo add-apt-repository ppa:igraph/ppa</code>   
 Then update your package database and install the python-igraph package:   
-<code>sudo apt-get update</code>
+<code>sudo apt-get update</code>   
 <code>sudo apt-get install python-igraph</code>
