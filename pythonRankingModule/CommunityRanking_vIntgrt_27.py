@@ -99,6 +99,13 @@ class communityranking(object):
                 print 'bad tweet'
                 pass
         client.close()
+        
+        statement = ('Total # of Tweets= ' + unicode(totTweets) + '\nTotal # of Tweets with mentions: ' +
+            unicode(totMentTws) + '\nTotal # of Tweets without mentions: ' + unicode(totNonMentTws) +
+            '\nTotal # of edges: ' + unicode(totMents) +
+            '\nTotal # of hashtags: ' + unicode(hashes) +
+            '\nTotal # of urls: ' + unicode(urlCount) +  '\n')
+        print statement
 
         pickle.dump(userDict, open('./tmp/'+dataCollection+'UserDict.pck', 'wb'), protocol = 2)
         zippedall=izip(alltime,tweetIds)
@@ -106,13 +113,6 @@ class communityranking(object):
         alltime, tweetIds = izip(*zippedall)
         alltime, tweetIds = list(alltime), list(tweetIds)
         tweetDict['alltime'], tweetDict['tweetIds'] = alltime, tweetIds
-
-        statement = ('Total # of Tweets= ' + unicode(totTweets) + '\nTotal # of Tweets with mentions: ' +
-            unicode(totMentTws) + '\nTotal # of Tweets without mentions: ' + unicode(totNonMentTws) +
-            '\nTotal # of edges: ' + unicode(totMents) +
-            '\nTotal # of hashtags: ' + unicode(hashes) +
-            '\nTotal # of urls: ' + unicode(urlCount) +  '\n')
-        print statement
 
         minTimeslotNum = 9
         timespan = alltime[-1]-alltime[0]
