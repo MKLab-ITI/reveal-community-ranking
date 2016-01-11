@@ -33,7 +33,7 @@ class communityranking(object):
         else:
             tweet_iterator = coll.find()
             pass
-
+        print 'Found %s tweets' %tweet_iterator.count()
         tweetDict = {'files':[],'tweets':{}}
         userDict = {}
         alltime, tweetIds = [], []
@@ -267,8 +267,8 @@ class communityranking(object):
                 strCommDict[v] = strCommDict.get(v, [])
                 strCommDict[v].append(usrlist[k])
                 strCommDict[v].sort()
-                numCommDict[v] = numCommDict.get(v, [])
-                numCommDict[v].append(self.uniqueUsers[usrlist[k]])
+                numCommDict[v] = numCommDict.get(v, set())
+                numCommDict[v].add(self.uniqueUsers[usrlist[k]])
                 numCommDict[v].sort()
                 try:
                     self.authorTwIdPerTmslDict[timeslot][usrlist[k]]
@@ -397,7 +397,8 @@ class communityranking(object):
                             if thres >= tmpratio or thres >= 1/tmpratio:
                                 continue
                             else:
-                                sim = len(set(bag1).intersection(prevComms)) / len(set(np.append(bag1, prevComms)))
+                                intersLen = len(bag1.intersection(prevComms))
+                                sim = intersLen / len(bag1.union(prevComms))
                                 if sim > thres:
                                     tmpsim[clmns2] = sim
                         if tmpsim:

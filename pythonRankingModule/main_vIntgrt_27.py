@@ -54,27 +54,27 @@ except:
 # User sets remote server location of visualization module
 try:
     remoteServer = sys.argv[5]    
-    socket.inet_aton(mongoHost)
+    socket.inet_aton(remoteServer)
 except:
-    remoteServer = str(input('Please provide remote server IP'))
+    remoteServer = str(input('Please provide remote server IP: '))
     pass
 # User sets json writing path for visualization module
 try:
     jsonWritingPath = sys.argv[6]
 except:
-    jsonWritingPath = str(input('Please provide remote server writing path'))
+    jsonWritingPath = str(input('Please provide remote server writing path: '))
     pass
 # User sets remote username
 try:
     username = sys.argv[7]
 except:
-    username = str(input('Please provide username'))
+    username = str(input('Please provide username: '))
     pass
 # User sets remote password
 try:
     password = sys.argv[8]
 except:
-    password = str(input('Please provide password'))
+    password = str(input('Please provide password: '))
     pass
 
 if not os.path.exists('./tmp/'):
