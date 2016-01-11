@@ -27,7 +27,7 @@ class communityranking(object):
 
         client = MongoClient(mongoHost)
         db = client[dataCollection]
-        coll = db.Item
+        coll = db.items
         if lowerTime and upperTime:
             tweet_iterator = coll.find({'timestamp_ms':{'$gte':lowerTime,'$lte':upperTime}})
         else:
