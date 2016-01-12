@@ -128,10 +128,10 @@ class communityranking(object):
             print 'samplingTime is %s days' % (samplingTime/86400)
         elif timeslotRatio > 43200:
             samplingTime = 43200
-            print 'samplingTime is %s days' % (samplingTime/86400)
+            print 'samplingTime is %s hours' % (samplingTime/3600)
         elif timeslotRatio > 21600:
             samplingTime = 21600
-            print 'samplingTime is %s days' % (samplingTime/3600)
+            print 'samplingTime is %s hours' % (samplingTime/3600)
         elif timeslotRatio > 10800:
             samplingTime = 10800
             print 'samplingTime is %s hours' % (samplingTime/3600)
@@ -269,7 +269,6 @@ class communityranking(object):
                 strCommDict[v].sort()
                 numCommDict[v] = numCommDict.get(v, set())
                 numCommDict[v].add(self.uniqueUsers[usrlist[k]])
-                numCommDict[v].sort()
                 try:
                     self.authorTwIdPerTmslDict[timeslot][usrlist[k]]
                     twIdCommDict[v] = twIdCommDict.get(v, [])
