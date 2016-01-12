@@ -9,7 +9,7 @@
 # Copyright:     (c) ITI (CERTH) 2015
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
-import time, os, sys, socket, glob, copyFilesRemotely
+import time, os, sys, socket, glob, copyFilesRemotely, pika
 '''Check for dependencies'''
 try:
     import igraph
@@ -80,9 +80,13 @@ except:
 if not os.path.exists('./tmp/'):
     os.makedirs('./tmp/')    
 
-if not os.path.exists('./tmp/'+dataCollection+'communities.json'):
+if not os.path.exists('./tmp/'+dataCollection+lowerLabel+upperLabel+'communities.txt'):
 
     print dataCollection
+
+    txtfiles = glob.glob('./tmp/'+dataCollection+'*.txt')
+    for txt in txtfiles:
+        os.remote(txt)
 
     '''Functions'''
 
@@ -113,26 +117,25 @@ if not os.path.exists('./tmp/'+dataCollection+'communities.json'):
         os.remove(origin)
     ssh.close()
 
-    pointerFile = open('./tmp/'+dataCollection+lowerLabel+upperLabel+'communities.json','w')
+    pointerFile = open('./tmp/'+dataCollection+lowerLabel+upperLabel+'communities.txt','w')
     pointerFile.close()
 
-else:
 
-    #send success message to rabbitMQ server
+
+#send success message to rabbitMQ server
+try:
+    credentials = pika.PlainCredentials('test', 'test')
     try:
-        import pika
-        credentials = pika.PlainCredentials('test', 'test')
-        try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-        except:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host='160.40.50.236', credentials=credentials))
-            pass
-        channel = connection.channel()
-        channel.queue_declare(queue='success')
-        channel.basic_publish(exchange='',routing_key='success',body='SUCCESS')
-        connection.close()
+        connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     except:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='160.40.50.236', credentials=credentials))
         pass
+    channel = connection.channel()
+    channel.queue_declare(queue='success')
+    channel.basic_publish(exchange='',routing_key='success',body='SUCCESS')
+    connection.close()
+except:
+    pass
 
 elapsed = time.time() - t
 print 'Elapsed: %.2f seconds' % elapsed
