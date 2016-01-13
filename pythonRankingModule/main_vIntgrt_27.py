@@ -9,7 +9,7 @@
 # Copyright:     (c) ITI (CERTH) 2015
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
-import time, os, sys, socket, glob, copyFilesRemotely, pika
+import time, os, sys, socket, glob, copyFilesRemotely, platform, pika
 '''Check for dependencies'''
 try:
     import igraph
@@ -66,15 +66,15 @@ except:
     pass
 # User sets remote username
 try:
-    username = sys.argv[7]
+    username = (sys.argv[7])
 except:
-    username = str(raw_input('Please provide username: '))
+    username = (str(raw_input('Please provide username: ')))
     pass
 # User sets remote password
 try:
-    password = sys.argv[8]
+    password = (sys.argv[8])
 except:
-    password = str(raw_input('Please provide password: '))
+    password = (str(raw_input('Please provide password: ')))
     pass
 
 if not os.path.exists('./tmp/'):
@@ -111,9 +111,12 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+upperLabel+'communities
  
     ssh = copyFilesRemotely.SSHConnection(remoteServer, username, password)
     for origin in jsonFiles:
-        filename = origin.split('\\')[-1]
+        if platform.system().lower() == 'windows':
+            filename = origin.split('\\')[-1]
+        else:
+            filename = origin.split('/')[-1]
         dst = (jsonWritingPath+'/visualizationModule/jsons/'+filename)
-        ssh.put(origin, dst)
+        ssh.sftpPut(origin, dst)
         os.remove(origin)
     ssh.close()
 
