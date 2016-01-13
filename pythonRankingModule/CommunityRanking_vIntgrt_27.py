@@ -505,7 +505,7 @@ class communityranking(object):
 
         del(commIds,self.alltime,commSizeBag)#,self.commPgRnkBag,self.commBag,)
 
-        statement = (unicode(evolcounter) + ' evolutions and ' + unicode(len(uniCommIds)) + ' dynamic communities and ' + unicode(commCntr)+' evolving communities' + '\n')
+        statement = ('We have ' + unicode(len(uniCommIds)) + ' dynamic communities and ' + unicode(commCntr)+' evolving communities' + '\n')
         print statement
         return self
 
