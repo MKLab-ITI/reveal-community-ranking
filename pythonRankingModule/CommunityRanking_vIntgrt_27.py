@@ -11,7 +11,7 @@
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
 import time, dateutil.parser, collections, pickle, random, json
-import itertools, math, requests, re, concurrent.futures
+import itertools, math, requests, re, concurrent.futures, nltk
 from io import open
 from itertools import izip
 import urllib2, urllib, urlparse
@@ -23,16 +23,8 @@ from urllib2 import urlopen
 
 class communityranking(object):
     @classmethod
-    def from_json(cls, mongoHost, dataCollection, lowerTime, upperTime):
+    def from_json(cls, tweet_iterator, client, dataCollection):
 
-        client = MongoClient(mongoHost)
-        db = client[dataCollection]
-        coll = db.items
-        if lowerTime and upperTime:
-            tweet_iterator = coll.find({'timestamp_ms':{'$gte':lowerTime,'$lte':upperTime}})
-        else:
-            tweet_iterator = coll.find()
-            pass
         print 'Found %s tweets' %tweet_iterator.count()
         tweetDict = {'files':[],'tweets':{}}
         userDict = {}
@@ -60,7 +52,7 @@ class communityranking(object):
                             userDict[json_line['entities']['user_mentions'][i]['screen_name'].lower()] = {'id':json_line['entities']['user_mentions'][i]['id_str'],'followers_count':0,
                                 'listed_count':0,'friends_count':0,'description':'','name':json_line['entities']['user_mentions'][i]['name'],'location':'','statuses_count':0,
                                 'timeOfInfo':mytime,'profile_image_url':''}
-                            totMents += 1
+                        totMents += 1
                     tweetDict['tweets'][json_line['id_str']] = {}
                     tweetDict['tweets'][json_line['id_str']]['user_mentions'] = tmpMents
                     alltime.append(mytime)
@@ -259,8 +251,7 @@ class communityranking(object):
                 tempUserPgRnk[k] = igraphUserPgRnk[i]#/pgRnkMax
             self.userPgRnkBag[timeslot] = tempUserPgRnk
 
-            #Detect Communities using the louvain algorithm#
-            # louvComms = gUndirected.community_multilevel(weights = 'weight')
+            #Detect Communities using the infomap algorithm#
             extractedComms = gDirected.community_infomap(edge_weights = 'weight')
             strCommDict, numCommDict, twIdCommDict = {}, {}, {}
             for k, v in enumerate(extractedComms.membership):
@@ -284,40 +275,23 @@ class communityranking(object):
             self.commBag[timeslot]['numComms'] = numCommDict
             self.commBag[timeslot]['tweetIds'] = twIdCommDict
 
+            print 'top 10 max community sizes are %s' %sorted([len(x) for x in numCommDict.values()],reverse = True)[:10]
+
             #Construct a graph using the communities as users
             tempCommGraph = extractedComms.cluster_graph(combine_edges = False)
-            tempAllCommGraphs = extractedComms.subgraphs()
-            tmprecipr = []
-            for x in tempAllCommGraphs:
-                if math.isnan(x.reciprocity()):
-                    tmprecipr.append(0)
-                else:
-                    tmprecipr.append(x.reciprocity())
             tempCommGraph.simplify(multiple=False, loops=True, combine_edges=False)
             self.commBag[timeslot]['commEdgesOut'],self.commBag[timeslot]['commEdgesIn'] = {},{}
             for idx, commAdj in enumerate(tempCommGraph.get_adjlist(mode='ALL')):
                 self.commBag[timeslot]['commEdgesOut'][idx] = []
-                self.commBag[timeslot]['commEdgesIn'][idx] = []
                 for x in commAdj:
                     if x!=idx:
                         self.commBag[timeslot]['commEdgesOut'][idx].append(x)
-                    else:
-                        self.commBag[timeslot]['commEdgesIn'][idx].append(x)
-
-            # self.commBag[timeslot]['Similarity_Jaccard'] = tempCommGraph.similarity_jaccard()
-            self.commBag[timeslot]['indegree'] = tempCommGraph.indegree()
-            self.commBag[timeslot]['outdegree'] = tempCommGraph.outdegree()
-            self.commBag[timeslot]['reciprocity'] = tmprecipr
 
             #Detect the centrality of each community using the PageRank algorithm
             commPgRnk = tempCommGraph.pagerank(weights = 'weight')
             minCPGR = min(commPgRnk)
             self.commPgRnkBag[timeslot] = commPgRnk
             self.commPgRnkBagNormed[timeslot] = [v/minCPGR for v in commPgRnk]
-
-            #Extract community degree
-            degreelist= tempCommGraph.degree(loops = False)
-            self.commBag[timeslot]['alldegree'] = degreelist
 
             sesStart = sesEnd
             timeslot += 1
@@ -354,7 +328,6 @@ class communityranking(object):
                     del(self.commBag[cBlen]['strComms'][k])
                     del(self.commBag[cBlen]['numComms'][k])
                     del(self.commBag[cBlen]['commEdgesOut'][k])#cut out communities that contain users that do not appear in more than one timeslots
-                    del(self.commBag[cBlen]['commEdgesIn'][k])
                     try:
                         del(self.commBag[cBlen]['tweetIds'][k])
                     except:
@@ -387,7 +360,7 @@ class communityranking(object):
                 tempcommSize = len(bag1)
                 for invrow in range(1, prevTimeslots + 1):
                     prevrow = rows - invrow
-                    tmpsim = {}
+                    tmpsim,tmpRealSim = {}, {}
                     if prevrow >= 0:
                         for clmns2,prevComms in self.commBag[prevrow]['numComms'].items():
                             lenprevComms = len(prevComms)
@@ -400,6 +373,7 @@ class communityranking(object):
                                 sim = intersLen / len(bag1.union(prevComms))
                                 if sim > thres:
                                     tmpsim[clmns2] = sim
+                                    tmpRealSim[clmns2] = intersLen
                         if tmpsim:
                             tmpsim = dict((x, v+round(random.random()/10000,5)) for x,v in tmpsim.items())
                             maxval = max(tmpsim.values())
@@ -408,21 +382,18 @@ class communityranking(object):
                         if maxval >= thres:
                             dynCommCountList = []
                             for idx, val in tmpsim.items():
+                                realVal = tmpRealSim[idx]
                                 if unicode(prevrow) + ',' + unicode(idx) not in commIds:
                                     evolcounter += 1
-                                    uniCommIdsEvol[dynCommCount] = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
+                                    uniCommIdsEvol[dynCommCount] = [[], [], [], [], [], [], [], [], [], [], []]
                                     uniCommIdsEvol[dynCommCount][0].append(prevrow)#timeslot num for first evolution
                                     uniCommIdsEvol[dynCommCount][1].append(self.commPgRnkBag[prevrow][idx])#community pagerank for first evolution
                                     uniCommIdsEvol[dynCommCount][2].append(commSizeBag[prevrow][idx])#community size per timeslot for first evolution
                                     uniCommIdsEvol[dynCommCount][3].append(self.commBag[prevrow]['strComms'][idx])#users in each community for first evolution
-                                    uniCommIdsEvol[dynCommCount][4].append(self.commBag[prevrow]['alldegree'][idx])#community degree for first evolution
+                                    # uniCommIdsEvol[dynCommCount][4].append(self.commBag[prevrow]['alldegree'][idx])#community degree for first evolution
                                     uniCommIdsEvol[dynCommCount][5].append(self.commPgRnkBagNormed[prevrow][idx])#normed community pagerank for first evolution
                                     uniCommIdsEvol[dynCommCount][8].append(unicode(prevrow) + ',' + unicode(idx))#community names in between
                                     uniCommIdsEvol[dynCommCount][9].append(self.commBag[prevrow]['commEdgesOut'][idx])
-                                    uniCommIdsEvol[dynCommCount][10].append(self.commBag[prevrow]['indegree'][idx])#indegree of community
-                                    uniCommIdsEvol[dynCommCount][11].append(self.commBag[prevrow]['outdegree'][idx])#outdegree of community
-                                    uniCommIdsEvol[dynCommCount][12].append(self.commBag[prevrow]['reciprocity'][idx])#reciprocity of community
-                                    uniCommIdsEvol[dynCommCount][13].append(self.commBag[prevrow]['commEdgesIn'][idx])
                                     commIds.append(unicode(prevrow) + ',' + unicode(idx))
                                     dynCommCountList.append(dynCommCount)
                                     tmpTw, tmpHa, tmptwId, tmpUrl = [], [], [], []
@@ -459,15 +430,12 @@ class communityranking(object):
                                 uniCommIdsEvol[d][1].append(self.commPgRnkBag[rows][clmns])#community pagerank per timeslot
                                 uniCommIdsEvol[d][2].append(commSizeBag[rows][clmns])#community size per timeslot
                                 uniCommIdsEvol[d][3].append(self.commBag[rows]['strComms'][clmns])#users in each community
-                                uniCommIdsEvol[d][4].append(self.commBag[rows]['alldegree'][clmns])#community degree per timeslot
+                                # uniCommIdsEvol[d][4].append(self.commBag[rows]['alldegree'][clmns])#community degree per timeslot
                                 uniCommIdsEvol[d][5].append(self.commPgRnkBagNormed[rows][clmns])#normed community pagerank per timeslot
                                 uniCommIdsEvol[d][7].append(val)#similarity between the two communities in evolving timesteps
                                 uniCommIdsEvol[d][8].append(unicode(rows) + ',' + unicode(clmns))#community names in between
                                 uniCommIdsEvol[d][9].append(self.commBag[rows]['commEdgesOut'][clmns])
-                                uniCommIdsEvol[d][10].append(self.commBag[rows]['indegree'][clmns])#indegree of community
-                                uniCommIdsEvol[d][11].append(self.commBag[rows]['outdegree'][clmns])#outdegree of community
-                                uniCommIdsEvol[d][12].append(self.commBag[rows]['reciprocity'][clmns])#reciprocity of community
-                                uniCommIdsEvol[d][13].append(self.commBag[rows]['commEdgesIn'][clmns])
+                                uniCommIdsEvol[d][10].append(realVal)
                                 commIds.append(unicode(rows) + ',' + unicode(clmns))
                                 tmpTw, tmpHa, tmptwId, tmpUrl = [], [], [], []
                                 for twId in self.commBag[rows]['tweetIds'][clmns]:
@@ -510,7 +478,7 @@ class communityranking(object):
         return self
 
     def commRanking(self,numTopComms):
-        import twython, nltk
+        import twython
         from nltk.corpus import stopwords
 
         regex1 = re.compile(u"(?:\@|#|https?\://)\S+",re.UNICODE)
@@ -532,7 +500,6 @@ class communityranking(object):
             tmptextlist = [[i for i in regex2.findall(regex1.sub('',' '.join(x).lower())) if i and not i.startswith(('rt','htt','(@','\'@','t.co')) and len(i)>2 and i not in definiteStop] for x in self.commTweetBag[Id]]
             simpleEntropyDict[Id] = [myentropy(x) for x in tmptextlist]
 
-            rankingDict[Id]['theseus'] = 1+len(set(uniCommIdsEvol[Id][3][0]).intersection(uniCommIdsEvol[Id][3][-1]))
             rankingDict[Id]['textentropy'] = sum(simpleEntropyDict[Id])/timeSlLen
             rankingDict[Id]['size'] = sum(uniCommIdsEvol[Id][2]) / uniqueTimeSlLen
             rankingDict[Id]['persistence'] = uniqueTimeSlLen / timeslots #persistence)
@@ -543,6 +510,7 @@ class communityranking(object):
             rankingDict[Id]['connections'] = sum([len(y) for y in [set(x) for x in uniCommIdsEvol[Id][9]]])/ uniqueTimeSlLen #connections to other communities
             rankingDict[Id]['urlAvg'] = sum([len(set(y)) for y in self.commUrlBag[Id]]) / uniqueTimeSlLen #average number of unique urls in every community
             rankingDict[Id]['similarityAvg'] = sum(uniCommIdsEvol[Id][7]) / uniqueTimeSlLen #average jaccardian between timeslots for each dyn comm
+            rankingDict[Id]['numRealPersistentUsrs'] = sum(uniCommIdsEvol[Id][10]) / len(uniCommIdsEvol[Id][10])
  
         '''Comms ranked in order of features'''
         rankedPerstability = sorted(rankingDict, key=lambda k: [rankingDict[Id]['perstability'],rankingDict[k]['connections'],rankingDict[k]['commCentralityNormed']], reverse = True)
@@ -550,7 +518,8 @@ class communityranking(object):
         rankedcommSize = sorted(rankingDict, key=lambda k: [rankingDict[k]['size'],rankingDict[k]['connections'],rankingDict[k]['commCentralityNormed']], reverse = True)
         rankedtextentropy = sorted(rankingDict, key=lambda k: [rankingDict[k]['textentropy'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
         rankedUrlAvg = sorted(rankingDict, key=lambda k: [rankingDict[k]['urlAvg'],rankingDict[k]['size'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
-        rankedTheseus = sorted(rankingDict, key=lambda k: [rankingDict[k]['theseus'],rankingDict[k]['similarityAvg'],rankingDict[k]['commMaxCentralityNormed']], reverse = True)
+        rankedTheseus = sorted(rankingDict, key=lambda k: [rankingDict[k]['numRealPersistentUsrs'],rankingDict[k]['similarityAvg'],rankingDict[k]['connections']], reverse = True)
+        
         
         commRanking = {}
         for Id in self.uniCommIds:
@@ -1010,12 +979,9 @@ def rankdata(a):
 def myentropy(data):
     if not data:
         return 0
-    entropy = 0
-    for x in set(data):
-        p_x = float(data.count(x))/len(data)
-        if p_x > 0:
-            entropy += -p_x*math.log(p_x, 2)
-    return entropy
+    freqdist = nltk.FreqDist(data)
+    probs = [freqdist.freq(l) for l in freqdist]
+    return -sum([p*math.log(p, 2) for p in probs])
 
 #----------------------------------------------------
 #tfidf module

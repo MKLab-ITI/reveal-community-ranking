@@ -17,6 +17,7 @@ except:
     print "Please run the setup file to install dependencies: \">python dependencyCheck.py install\""
     # pass
 from CommunityRanking_vIntgrt_27 import communityranking
+from pymongo import MongoClient
 #-------------------------------
 print time.asctime( time.localtime(time.time()) )
 t = time.time()
@@ -80,7 +81,18 @@ except:
 if not os.path.exists('./tmp/'):
     os.makedirs('./tmp/')    
 
-if not os.path.exists('./tmp/'+dataCollection+lowerLabel+upperLabel+'communities.txt'):
+client = MongoClient(mongoHost)
+db = client[dataCollection]
+coll = db.items
+if lowerTime and upperTime:
+    tweet_iterator = coll.find({'timestamp_ms':{'$gte':lowerTime,'$lte':upperTime}})
+else:
+    tweet_iterator = coll.find()
+    pass
+mongoRecentTime = str(coll.find_one(sort=[("timestamp_ms", -1)])["timestamp_ms"])
+##print mongoRecentTime
+
+if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mongoRecentTime+'communities.txt'):
 
     print dataCollection
 
@@ -90,14 +102,14 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+upperLabel+'communities
 
     '''Functions'''
 
-    data = communityranking.from_json(mongoHost, dataCollection, lowerTime, upperTime)
+    data = communityranking.from_json(tweet_iterator, client, dataCollection)
     elapsed = time.time() - t
     print 'Stage 1: %.2f seconds' % elapsed
 
     #User sets how many timeslots back the framework should search
     prevTimeslots = 3
     dataEvol=data.evol_detect(prevTimeslots)
-    del(data)
+    del(data, tweet_iterator, coll)
     elapsed = time.time() - t
     print 'Stage 3: %.2f seconds' % elapsed
 
@@ -120,7 +132,7 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+upperLabel+'communities
         os.remove(origin)
     ssh.close()
 
-    pointerFile = open('./tmp/'+dataCollection+lowerLabel+upperLabel+'communities.txt','w')
+    pointerFile = open('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mongoRecentTime+'communities.txt','w')
     pointerFile.close()
 
 
