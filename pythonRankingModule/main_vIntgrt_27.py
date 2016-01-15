@@ -98,7 +98,7 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mong
 
     txtfiles = glob.glob('./tmp/'+dataCollection+'*.txt')
     for txt in txtfiles:
-        os.remote(txt)
+        os.remove(txt)
 
     '''Functions'''
 
