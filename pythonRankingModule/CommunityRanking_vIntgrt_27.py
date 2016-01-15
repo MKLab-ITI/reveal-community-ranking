@@ -537,11 +537,19 @@ class communityranking(object):
         self.urlDictionaryUpdate(rankedCommunities[0:numTopComms])
 
         '''Set up twitter api to retrieve profile images from usernames'''
-        CONS_KEY = 'AvLwOrpwRUQ8lGTNmZmPA'
-        CONS_SECRET = '9PxFSwG6DiiAOOCZ5oLHi649gxK3iwf8Q9czNZXFE'
-        OAUTH_TOKEN = '1161058188-vlXu5zNTP3SZfubVFWJBMQd4Dq7YBBSYOQPMSyP'
-        OAUTH_TOKEN_SECRET = '6sR2NpNGcVkPJsiI1oG0xGKrvssL9O9ARnMycHLV54'
-        mytwitter = twython.Twython(CONS_KEY, CONS_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+        try:
+            with open('./twitterCreds.txt','r') as f:
+                creds = [x.strip() for x in f.readlines()]
+                CONS_KEY, CONS_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET = creds[0], creds[1], creds[2], creds[3]
+                mytwitter = twython.Twython(CONS_KEY, CONS_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+        except:     
+            print 'no valid twitter credentials were found. Using konkonst creds...'           
+            CONS_KEY = 'AvLwOrpwRUQ8lGTNmZmPA'
+            CONS_SECRET = '9PxFSwG6DiiAOOCZ5oLHi649gxK3iwf8Q9czNZXFE'
+            OAUTH_TOKEN = '1161058188-vlXu5zNTP3SZfubVFWJBMQd4Dq7YBBSYOQPMSyP'
+            OAUTH_TOKEN_SECRET = '6sR2NpNGcVkPJsiI1oG0xGKrvssL9O9ARnMycHLV54'
+            mytwitter = twython.Twython(CONS_KEY, CONS_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+            pass
 
         self.usernameProfPicDict = {}
 
@@ -552,7 +560,7 @@ class communityranking(object):
     		nltk.download('stopwords')
     		stopW = stopwords.words('english')
     		pass
-        if self.dataCollection.startswith('greek'):
+        if 'greek' in self.dataCollection:
             session = requests.Session()
             grstopwords = session.get('https://www.dropbox.com/s/d6rvcmfu6c5jlsp/greek_stopwords.txt?raw=1').content.decode('ISO-8859-7').split('\r\n')
             stopW.extend(grstopwords)
