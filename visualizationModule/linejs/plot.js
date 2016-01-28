@@ -40,10 +40,10 @@ $.ajax({
     type: "GET",
     url: "jsons/" + colname + "communities.json",
     dataType: "json",
-    success: function (data) {
+    success: function(data) {
 
-        min = data.datasetInfo.limits.min;
-        max = data.datasetInfo.limits.max;
+        min = data.datasetInfo.limits.min+9000;
+        max = data.datasetInfo.limits.max+30000;
         usersmin = data.datasetInfo.limits.usersmin;
         usersmax = data.datasetInfo.limits.usersmax;
         centmin = data.datasetInfo.limits.centmin;
@@ -53,7 +53,7 @@ $.ajax({
         fixed = data.datasetInfo.limits.fixed;
 
         timelen = data.datasetInfo.allTimeslots.length;
-        mindate = (data.datasetInfo.allTimeslots[0] - min) * 1000;
+        mindate = (data.datasetInfo.allTimeslots[0]-min) * 1000;
         maxdate = (data.datasetInfo.allTimeslots[timelen - 1] + max) * 1000;
         conlen = 0;
 
@@ -243,35 +243,36 @@ $.ajax({
     },
     async: false
 });
-nv.addGraph(function () {
+nv.addGraph(function() {
     chart = nv.models.lineChart()
-        .margin({left: 100})
-        .transitionDuration(350)
-        .useInteractiveGuideline(false)
-        .showYAxis(true)
-        .showXAxis(true)
-        .forceX([new Date(mindate), new Date(maxdate)])
-        .forceY([1, 20])
-        .showLegend(false)
-        .yDomain([21, 1]);
+            .margin({left: 100})
+            .transitionDuration(350)
+            .useInteractiveGuideline(false)
+            .showYAxis(true)
+            .showXAxis(true)
+            .forceX([new Date(mindate), new Date(maxdate)])
+            .forceY([1, 20])
+            .height($(window).height() - 30)
+            .showLegend(false)
+            .yDomain([21, 1]);
 
     chart.xAxis
-        .axisLabel("")
-        .tickValues(tickMarks)
-        .tickFormat(function (d) {
-            return d3.time.format('%e %b %H:%M')(new Date(d));
-        });
+            .axisLabel("")
+            .tickValues(tickMarks)
+            .tickFormat(function(d) {
+                return d3.time.format('%e %b %H:%M')(new Date(d));
+            });
 
     chart.yAxis
-        .tickValues(tickMarks2)
-        .tickFormat(function (d) {
-            return "Community   " + d;
-        });
+            .tickValues(tickMarks2)
+            .tickFormat(function(d) {
+                return "Community   " + d;
+            });
 
     d3.select('#chart1 svg')
-        .datum(databul())
-        .call(chart);
-    chart.lines.dispatch.on('elementClick', function (e) {//epointy-1//timestamps.indexOf(e.point.x)
+            .datum(databul())
+            .call(chart);
+    chart.lines.dispatch.on('elementClick', function(e) {//epointy-1//timestamps.indexOf(e.point.x)
         var full = 1;
         if ($('#admin').text().substr(21) === "Users") {
             if (users[e.point.y - 1][timestamps.indexOf(e.point.x)] === 0) {
@@ -295,40 +296,40 @@ nv.addGraph(function () {
         else {
             createnet(e.point.y, timestamps.indexOf(e.point.x));
 
-            nv.addGraph(function () {
+            nv.addGraph(function() {
                 chart3 = nv.models.lineChart()
-                    .margin({top: 15, left: 100})
-                    .transitionDuration(350)
-                    .useInteractiveGuideline(false)
-                    .showYAxis(true)
-                    .showXAxis(true)
-                    .forceX([new Date(mindate), new Date(maxdate)])
-                    .showLegend(false)
-                    .tooltips(false);
+                        .margin({top: 15, left: 100})
+                        .transitionDuration(350)
+                        .useInteractiveGuideline(false)
+                        .showYAxis(true)
+                        .showXAxis(true)
+                        .forceX([new Date(mindate), new Date(maxdate)])
+                        .showLegend(false)
+                        .tooltips(false);
 
                 chart3.xAxis
-                    .tickValues(tickMarks)
-                    .rotateLabels(-45)
-                    .tickFormat(function (d) {
-                        return d3.time.format('%e %b %H:%M')(new Date(d));
-                    });
+                        .tickValues(tickMarks)
+                        .rotateLabels(-45)
+                        .tickFormat(function(d) {
+                            return d3.time.format('%e %b %H:%M')(new Date(d));
+                        });
 
                 chart3.yAxis
-                    .tickValues(tickMarks2)
-                    .tickFormat(function (d) {
-                        return "Community   " + d;
-                    });
+                        .tickValues(tickMarks2)
+                        .tickFormat(function(d) {
+                            return "Community   " + d;
+                        });
                 d3.select('#chart3 svg')
-                    .datum(databulone(e.point.y))
-                    .call(chart3);
+                        .datum(databulone(e.point.y))
+                        .call(chart3);
 
 
-                chart3.lines.dispatch.on('elementClick', function (e) {
+                chart3.lines.dispatch.on('elementClick', function(e) {
                     if (e.point.z !== 0) {
                         animate(timestamps.indexOf(e.point.x));
                     }
                 });
-                setTimeout(function () {
+                setTimeout(function() {
                     var text = $('#admin').text();
                     //for (var i = 0; i < 1; i++) {
                     for (var j = 0; j < timelen; j++) {
@@ -377,8 +378,8 @@ nv.addGraph(function () {
 
 
                     d3.select('#chart3')
-                        .selectAll('path.nv-line')
-                        .style('opacity', 0);
+                            .selectAll('path.nv-line')
+                            .style('opacity', 0);
                     $("#chart3 .nv-axisMaxMin").hide();
                 }, 100);
                 return chart;
@@ -386,7 +387,7 @@ nv.addGraph(function () {
 
             $('#container').stop().animate({"opacity": 1});
 
-            $('#chart2,#chart1').stop().animate({"opacity": 0}, 1000, function () {
+            $('#chart2,#chart1').stop().animate({"opacity": 0}, 1000, function() {
                 $('#chart2,#chart1').hide();
             });
 
@@ -394,11 +395,12 @@ nv.addGraph(function () {
         }
     });
 
-
-    chart.lines.dispatch.on('elementMouseover', function (e) {
+var toolheight;
+    chart.lines.dispatch.on('elementMouseover', function(e) {
 
         $('.nvtooltip').html('');
         if (e.point.z > 0) {
+            toolheight=200;
             $('.nvtooltip').html('<table class="nv-pointer-events-none"><thead></thead><tbody></tbody></table>');
             $('.nvtooltip table thead').append('<tr class="nv-pointer-events-none"><td colspan="3" class="nv-pointer-events-none"><strong class="x-value">' + d3.time.format('%e %b %H:%M')(new Date(e.point.x)) + '</strong></td></tr>')
             $('.nvtooltip table tbody').append('<tr class="nv-pointer-events-none"><td class="legend-color-guide nv-pointer-events-none"><div style="background-color: #000000;" class="nv-pointer-events-none"></div></td><td class="key nv-pointer-events-none">Centrality <span>' + centrality[e.point.y - 1][timestamps.indexOf(e.point.x)].toFixed(fixed) + '</span></td></tr>');
@@ -452,7 +454,7 @@ nv.addGraph(function () {
                 $('.nvtooltip #ta2').append('<p class="ftweets">' + furls[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 4] + '&nbsp;&nbsp;&nbsp;<b>(' + furlssize[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 4] + ')</b></p>');
             }
 
-            setTimeout(function () {
+            setTimeout(function() {
 
                 if (!(tags[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] === "-")) {
                     $('#hashtagsdiv').append('<p style="padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + tags[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(tagssize[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5]) + '</p>');
@@ -537,17 +539,17 @@ nv.addGraph(function () {
 
             }, 500);
             d3.select('g.nv-interactive').append("g").attr("class", " nv-wrap nv-interactiveLineLayer").append("g").attr("class", "nv-interactiveGuideLine").append("line")
-                .attr("class", "nv-guideline")
-                .attr("x1", e.pos[0] - 100)
-                .attr("x2", e.pos[0] - 100)
-                .attr("y1", $('.nv-lineChart g rect').attr('height'))
-                .attr("y2", 0)
-            ;
+                    .attr("class", "nv-guideline")
+                    .attr("x1", e.pos[0] - 100)
+                    .attr("x2", e.pos[0] - 100)
+                    .attr("y1", $('.nv-lineChart g rect').attr('height'))
+                    .attr("y2", 0)
+                    ;
             //line.exit().remove();;
 
 
             var point;
-            $('#chart1 .nv-scatterWrap .nv-groups .nv-series-' + (e.point.y - 1) + ' .nv-point').attr("fill", "#666666");
+            $('#chart1 .nv-scatterWrap .nv-groups .nv-series-' + (e.point.y - 1) + ' .nv-point').attr("fill", "#666666").attr('stroke', '#666');
 
             for (var j = 0; j < conlen; j++) {
                 for (var i = 0; i < 2; i++) {
@@ -555,7 +557,7 @@ nv.addGraph(function () {
 
                         for (var k = 0; k < con[j].length; k++) {
                             point = ((con[j][k].x - 1344556800000) / 14400000);
-                            $('#chart1 .nv-scatterWrap .nv-groups .nv-series-' + (con[j][k].y - 1) + ' .nv-point-' + point).attr("fill", "#666666");
+                            $('#chart1 .nv-scatterWrap .nv-groups .nv-series-' + (con[j][k].y - 1) + ' .nv-point-' + point).attr("fill", "#666666").attr('stroke', '#666');
                         }
                     }
                 }
@@ -570,17 +572,17 @@ nv.addGraph(function () {
         //}, 300);
     });
 
-    chart.lines.dispatch.on('elementMouseout', function () {
+    chart.lines.dispatch.on('elementMouseout', function() {
         $('.nvtooltip').html('');
         //$("#ta,#ta2").empty();   
         $('g.nv-interactive').html('');
-        $('#chart1 .nv-lineChart circle.nv-point').attr("fill", "#B5B5B5");
+        $('#chart1 .nv-lineChart circle.nv-point').attr("fill", "#a90f0a");
     });
 
 
-    setTimeout(function () {
+    setTimeout(function() {
         var text = $('#admin').text();
-        $('#chart1 .nv-x .tick text').attr("transform", 'translate(0,' + -($('#chart1').height() - 30) + ')rotate(45 0 0)');
+        $('#chart1 .nv-x .tick text').attr("transform", 'translate(0,' + -($('#chart1').height() + 30) + ')rotate(45 0 0)');
         for (var i = 0; i < cumlen; i++) {
             for (var j = 0; j < timelen; j++) {
                 if (text.substr(21) === "Users") {
@@ -624,10 +626,13 @@ nv.addGraph(function () {
         $('#chart1 .nv-scatterWrap .nv-groups .nv-group circle').attr("stroke-opacity", ".3");
 
 
-        d3.select('#chart1')
-            .selectAll('path.nv-line')
-            .style('opacity', 0);
-        $(".nv-y .nv-axisMaxMin").first().hide();
+//        d3.select('#chart1')
+//            .selectAll('path.nv-line')
+//            .style('opacity', 0);
+        //$(".nv-y .nv-axisMaxMin").first().hide();
+       
+        $(".nv-x .nv-axisMaxMin").first().attr('transform', 'translate(0 -'+($(window).height()-58)+') rotate(45)');
+        $(".nv-x .nv-axisMaxMin").eq(1).attr('transform', 'translate('+($(window).width()-200)+' -'+($(window).height()-58)+') rotate(45)');
 
 
     }, 100);
@@ -687,7 +692,7 @@ function databul() {
         data.push({
             values: cum[j],
             key: "Community " + (j + 1),
-            color: "#B5B5B5"
+            color: "#a90f0a"
         });
     }
 
@@ -759,7 +764,7 @@ function databulone(point) {
     data.push({
         values: cumone,
         key: "Community " + point,
-        color: "#B5B5B5"
+        color: "#a90f0a"
     });
     return data;
 }
@@ -769,6 +774,8 @@ function gup(name) {
     var regexS = "[\\?&]" + name + "=([^&#]*)";
     var regex = new RegExp(regexS);
     var results = regex.exec(window.location.href);
-    if (results == null) return "";
-    else return results[1];
+    if (results == null)
+        return "";
+    else
+        return results[1];
 }

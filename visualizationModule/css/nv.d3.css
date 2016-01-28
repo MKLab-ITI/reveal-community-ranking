@@ -109,7 +109,7 @@ html {
 }
 
 body {
-    overflow-x: hidden;
+    overflow: hidden;
     height: 100%;
     font-family: 'Open Sans';
 }
@@ -149,9 +149,9 @@ svg {
     position: absolute;
     top: 0px;
     margin-top: 90px;
-    height: -moz-calc(200% - 95px);
-    height: -webkit-calc(200% - 95px);
-    height: calc(200% - 95px);
+    height: -moz-calc(100% - 95px);
+    height: -webkit-calc(100% - 95px);
+    height: calc(100% - 90px);
     width: 100%
 }
 
@@ -212,13 +212,13 @@ svg {
     putting a "with-transitions" class on the container div.
 */
 .nvtooltip.with-transitions, .with-transitions .nvtooltip {
-    transition: opacity 250ms linear;
-    -moz-transition: opacity 250ms linear;
-    -webkit-transition: opacity 250ms linear;
+    transition: opacity 550ms linear;
+    -moz-transition: opacity 550ms linear;
+    -webkit-transition: opacity 550ms linear;
 
-    transition-delay: 250ms;
-    -moz-transition-delay: 250ms;
-    -webkit-transition-delay: 250ms
+    transition-delay: 550ms;
+    -moz-transition-delay: 550ms;
+    -webkit-transition-delay: 550ms
 }
 
 .nvtooltip.x-nvtooltip,
@@ -234,7 +234,6 @@ svg {
     background-color: #E8E8E8;
     text-align: center;
 
-/ / border-bottom : 1 px solid darkgray;
 
     -webkit-border-radius: 5px 5px 0 0;
     -moz-border-radius: 5px 5px 0 0;
@@ -277,7 +276,6 @@ svg {
 .categories {
     display: inline-block;
     width: 150px;
-/ / 150 px text-align : center;
     margin-top: 5px !important;
     padding: 0 !important;
 
@@ -417,7 +415,7 @@ svg .title {
 }
 
 .nvd3 .nv-axis .nv-axisMaxMin text {
-    font-weight: bold;
+    //font-weight: bold;
 }
 
 .nvd3 .x .nv-axis .nv-axisMaxMin text,
@@ -538,6 +536,7 @@ svg .title {
 .nvd3 .nv-groups path.nv-line {
     fill: none;
     stroke-width: 1.5px;
+    opacity:0;
     /*
     stroke-linecap: round;
     shape-rendering: geometricPrecision;
@@ -599,9 +598,6 @@ svg .title {
 .nvd3.nv-scatter .nv-groups .nv-point.hover,
 .nvd3 .nv-groups .nv-point.hover {
     stroke-width: 1px;
-/ / opacity : 1 !important;
-/ / stroke-opacity : 1 !important;
-/ / fill : red;
     stroke: #666666;
 }
 
@@ -973,7 +969,7 @@ Interactive Layer
 }
 
 .nv-x .nv-axisMaxMin {
-    display: none;
+    //display: none;
 }
 
 #chart3 .nv-axis .tick text {
@@ -2015,7 +2011,6 @@ height:48px;
     top: 0;
     border-right: 2px dashed gray;
     left: 150px;
-/ / 150 px
 }
 
 #first2 {
@@ -2032,7 +2027,6 @@ height:48px;
     top: 0;
     border-right: 2px dashed gray;
     left: 300px;
-/ / 300 px
 }
 
 #third {
