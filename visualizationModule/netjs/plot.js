@@ -4,7 +4,6 @@ sigma.canvas.nodes.image = (function () {
         _loading = {},
         _callbacks = {};
 
-    // Return the renderer itself:
     var renderer = function (node, context, settings) {
         var args = arguments,
             prefix = settings('prefix') || '',
@@ -62,8 +61,6 @@ sigma.canvas.nodes.image = (function () {
         }
     };
 
-    // Let's add a public method to cache images, to make it possible to
-    // preload images before the initial rendering:
     renderer.cache = function (url, callback) {
         if (callback)
             _callbacks[url] = callback;
@@ -101,16 +98,6 @@ sigma.classes.graph.addMethod('neighbors', function (nodeId) {
 
     return neighbors;
 });
-
-
-/**
- * This is an example on how to use sigma filters plugin on a real-world graph.
- */
-//var filter;
-
-/**
- * DOM utility functions
- */
 
 var s, s2,
     N,
@@ -153,22 +140,18 @@ window.onload = function () {
             "#0089ff"
         ]
     });
-
-
-    //setTimeout(function(){
-    $('#g1 svg text').eq(0).attr('y', '12');
-    $('#g1 svg text').eq(1).attr('y', '10');
-    $('#g1 svg text').eq(2).attr('y', '7');
-    $('#g1 svg text').eq(3).attr('y', '5');
-    $('#g1 svg text').eq(4).attr('y', '5');
+    var $g1 = $('#g1').find('svg text');
+    $g1.eq(0).attr('y', '12');
+    $g1.eq(1).attr('y', '10');
+    $g1.eq(2).attr('y', '7');
+    $g1.eq(3).attr('y', '5');
+    $g1.eq(4).attr('y', '5');
     myinterval = setInterval(function () {
         g1.refresh(50);
     }, 1500);
 };
 
 function createnet(com, timeslot) {
-
-
     bigger = 0;
     urls.length = 0;
     labels.length = 0;
@@ -238,7 +221,7 @@ function createnet(com, timeslot) {
                     urls.push('imgs/noprofile.gif');
                 }
                 else {
-                    urls.push(data.datasetInfo.allUsernames[i].avatar);
+                    urls.push("https://twitter.com/" + data.datasetInfo.allUsernames[i].screen_name + "/profile_image?size=normal");
                 }
 
                 if (data.datasetInfo.allUsernames[i].screen_name === "") {
@@ -385,12 +368,9 @@ function createnet(com, timeslot) {
                 });
             }
 
-// Refresh the renderers to make the changes effective:
-            s.refresh();
-            //sigma.plugins.dragNodes(s, s.renderers[0]);
 
-            // We first need to save the original colors of our
-            // nodes and edges, like this:
+            s.refresh();
+
             s.graph.nodes().forEach(function (n) {
                 n.originalColor = n.color;
             });
@@ -445,16 +425,10 @@ function createnet(com, timeslot) {
                     else
                         e.color = '#eee';
                 });
-
-                // Since the data has been modified, we need to
-                // call the refresh method to make the colors
-                // update effective.
                 s.refresh();
             });
 
 
-            // When the stage is clicked, we just color each
-            // node and edge with its original color.
             s.bind('clickStage', function (e) {
                 jQuery(".user-profile").hide(1000);
                 s.graph.nodes().forEach(function (n) {
@@ -572,8 +546,6 @@ function animate(direction) {
                     target: 'n' + labels.indexOf(con[1]),
                     size: con[2],
                     type: "curvedArrow"
-                    //type: 'curve'
-                    //head: 'arrow'
                 });
             }
 
@@ -608,7 +580,7 @@ function animate(direction) {
                     });
 
                     g.nodes.push(o);
-                    // }
+
                     if (sizesnxt[i] > 0) {
                         bigger++;
                     }
@@ -616,14 +588,10 @@ function animate(direction) {
             }
 
 
-
-
             if (s) {
                 s.graph.clear();
-                //this gets rid of any methods you've attached to s.
                 s.graph.kill();
-                // your code here.
-            };
+            }
             s = new sigma({
                 graph: g,
                 renderer: {
@@ -638,8 +606,6 @@ function animate(direction) {
                     maxNodeSize: 25
                 }
             });
-
-
             setTimeout(function () {
                 s.graph.nodes().forEach(function (node, index) {
                     //console.log(node.size+"-"+node.label);
@@ -652,7 +618,6 @@ function animate(direction) {
             }, 900);
 
             s.graph.nodes().forEach(function (node, index) {
-                //console.log(node.size+"-"+node.label);
                 if ((sizesnxt[index] === 0) && (sizesnow[index] === 0)) {
                     node.hidden = true;
                 }
@@ -665,14 +630,10 @@ function animate(direction) {
 
                 }
                 else {
-                    //s.graph.nodes().forEach(function(node) {
                     if (sizesnxt[index] === 1) {
                         node.hidden = false;
                     }
-
                 }
-
-
             });
 
             sizesnow = sizesnxt.slice(0);
@@ -727,15 +688,9 @@ function animate(direction) {
                     else
                         e.color = '#eee';
                 });
-
-                // Since the data has been modified, we need to
-                // call the refresh method to make the colors
-                // update effective.
                 s.refresh();
             });
 
-            // When the stage is clicked, we just color each
-            // node and edge with its original color.
             s.bind('clickStage', function (e) {
                 jQuery(".user-profile").hide(1000);
                 s.graph.nodes().forEach(function (n) {
@@ -746,7 +701,6 @@ function animate(direction) {
                     e.color = e.originalColor;
                 });
 
-                // Same as in the previous event:
                 s.refresh();
             });
             myinter = setInterval(function () {
@@ -937,11 +891,7 @@ jQuery("#more img").click(function () {
                 e.color = '#eee';
         });
 
-        // Since the data has been modified, we need to
-        // call the refresh method to make the colors
-        // update effective.
         s2.refresh();
-        //console.dir(e);
         if (e.data.node.label === username) {
             d3.selectAll(".nv-series-0 .nv-bar").attr('style', 'fill: rgb(93, 159, 210);stroke: rgb(93, 159, 210);');
             d3.selectAll(".nv-series-1 .nv-bar").attr('style', 'fill: rgb(44, 160, 44);stroke: rgb(44, 160, 44);');
@@ -1014,8 +964,6 @@ jQuery("#more img").click(function () {
                     }
 
                 }
-
-
                 values.push({x: name, y: itemAmount2, realname: labels[i], takis: itemAmount});
                 values2.push({x: name, y: itemAmount, realname: labels[i]});
 
@@ -1035,27 +983,13 @@ jQuery("#more img").click(function () {
 
     nv.addGraph(function () {
         var chart = nv.models.multiBarChart()
-                //.x(function(d) { return d.label })
-                //.y(function(d) { return d.value })
-                //.staggerLabels(true)
-                //.staggerLabels(data[0].values.length >1)
                 .tooltips(true)
-                //.barColor(d3.scale.category20().range())
                 .stacked(true).showControls(false)
-                .duration(1300)//only in liq this works
-                //.margin({bottom: 100, left: 70})
-                //.rotateLabels(45)
+                .duration(1300)
                 .groupSpacing(0.05)
-                .reduceXTicks(false)//.staggerLabels(true)
-
-                //.showLegend(false)
-                //.rotate(45)
+                .reduceXTicks(false)
                 .margin({bottom: 80})
-                //.showValues(true)
-                //.transitionDuration(250)
-                //.color(["#5d9fd2","#ff0000"])
                 .tooltipContent(function (key, x, y, realname) {
-                    //console.dir(realname);
                     if (realname.point.series === 0) {
                         return '<h3><img class="toolimg" src="' + urls[labels.indexOf(realname.point.realname)] + '" onError="this.src=\'imgs/noprofile.gif\';"/><p>' + realname.point.realname + '</p></h3>' + '<p>In:  ' + realname.point.y + '</p>' + '<p>Out:  ' + realname.point.takis + '</p>';
                     }
@@ -1103,8 +1037,6 @@ jQuery("#more img").click(function () {
                             else
                                 n.color = '#eee';
                         });
-                        //console.log(nodeId);
-                        //console.dir(e.data.node);
 
                         s2.graph.edges().forEach(function (e) {
                             if (toKeep[e.source] && toKeep[e.target])
@@ -1122,14 +1054,8 @@ jQuery("#more img").click(function () {
             .attr('transform', function (d, i, j) {
                 return 'translate (-10, 33) rotate(-90 0,0)'
             })
-
-
     });
-
-
 });
-
-
 jQuery("#minimize").click(function () {
     s.graph.nodes().forEach(function (node) {
         if (node.size === 1) {
