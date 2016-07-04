@@ -23,5 +23,5 @@ setup(
     author_email='konkonst@iti.gr',
     version='1.0',
     install_requires=('pip','python-dateutil','requests','pymongo','futures',
-                      'twython','pika','paramiko','nltk','numpy','python-igraph')
+                      'twython','pika','nltk','numpy','python-igraph')
 )
