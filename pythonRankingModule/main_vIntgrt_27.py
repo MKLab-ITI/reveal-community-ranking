@@ -9,7 +9,7 @@
 # Copyright:     (c) ITI (CERTH) 2015
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
-import time, os, sys, socket, glob, pika#, platformcopyFilesRemotely, 
+import time, os, sys, socket, glob, pika
 '''Check for dependencies'''
 try:
     import igraph
@@ -59,31 +59,6 @@ except:
     upperTime = False
     upperLabel = 'Full'
     pass
-# # User sets remote server location of visualization module
-# try:
-#     remoteServer = sys.argv[5]    
-#     socket.inet_aton(remoteServer)
-# except:
-#     remoteServer = str(raw_input('Please provide remote server IP: '))
-#     pass
-# # User sets json writing path for visualization module
-# try:
-#     jsonWritingPath = sys.argv[6]
-# except:
-#     jsonWritingPath = str(raw_input('Please provide remote server writing path: '))
-#     pass
-# # User sets remote username
-# try:
-#     username = (sys.argv[7])
-# except:
-#     username = (str(raw_input('Please provide username: ')))
-#     pass
-# # User sets remote password
-# try:
-#     password = (sys.argv[8])
-# except:
-#     password = (str(raw_input('Please provide password: ')))
-#     pass
 
 if not os.path.exists('./tmp/'):
     os.makedirs('./tmp/')    
@@ -134,21 +109,7 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mong
     dyccos.insert(jsondata)
     client2.close()
 
-
     os.remove('./tmp/'+dataCollection+'UserDict.pck')
-
-    # jsonFiles = glob.glob('./tmp/*.json')
-
-    # ssh = copyFilesRemotely.SSHConnection(remoteServer, username, password)
-    # for origin in jsonFiles:
-    #     if platform.system().lower() == 'windows':
-    #         filename = origin.split('\\')[-1]
-    #     else:
-    #         filename = origin.split('/')[-1]
-    #     dst = (jsonWritingPath+'/visualizationModule/jsons/'+filename)
-    #     ssh.sftpPut(origin, dst)
-    #     os.remove(origin)
-    # ssh.close()    
 
     pointerFile = open('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mongoRecentTime+'communities.txt','w')
     pointerFile.close()
