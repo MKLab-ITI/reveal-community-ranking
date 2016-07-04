@@ -96,7 +96,7 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mong
     print 'Stage 3: %.2f seconds' % elapsed
 
     client2 = MongoClient(mongoTargetHost)
-    db2 = client2[dataCollection+'Target']
+    db2 = client2[dataCollection]
     db2.dynCommunities.drop()
     db2.dynUserData.drop()
     dyccos=db2.dynCommunities
