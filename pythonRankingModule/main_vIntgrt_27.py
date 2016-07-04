@@ -9,7 +9,7 @@
 # Copyright:     (c) ITI (CERTH) 2015
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
-import time, os, sys, socket, glob, copyFilesRemotely, platform, pika
+import time, os, sys, socket, glob, pika#, platformcopyFilesRemotely, 
 '''Check for dependencies'''
 try:
     import igraph
@@ -29,6 +29,13 @@ try:
     socket.inet_aton(mongoHost)
 except:
     mongoHost = 'localhost'
+    pass
+try:
+    mongoTargetHost = 'social1.atc.gr:27017'
+    socket.inet_aton(mongoTargetHost)
+except:
+    print 'target mongo host %s is not available' %mongoTargetHost  
+    mongoTargetHost = str(raw_input('Please provide target mongo host: '))
     pass
 # User sets json dataset folder
 try:
@@ -52,31 +59,31 @@ except:
     upperTime = False
     upperLabel = 'Full'
     pass
-# User sets remote server location of visualization module
-try:
-    remoteServer = sys.argv[5]    
-    socket.inet_aton(remoteServer)
-except:
-    remoteServer = str(raw_input('Please provide remote server IP: '))
-    pass
-# User sets json writing path for visualization module
-try:
-    jsonWritingPath = sys.argv[6]
-except:
-    jsonWritingPath = str(raw_input('Please provide remote server writing path: '))
-    pass
-# User sets remote username
-try:
-    username = (sys.argv[7])
-except:
-    username = (str(raw_input('Please provide username: ')))
-    pass
-# User sets remote password
-try:
-    password = (sys.argv[8])
-except:
-    password = (str(raw_input('Please provide password: ')))
-    pass
+# # User sets remote server location of visualization module
+# try:
+#     remoteServer = sys.argv[5]    
+#     socket.inet_aton(remoteServer)
+# except:
+#     remoteServer = str(raw_input('Please provide remote server IP: '))
+#     pass
+# # User sets json writing path for visualization module
+# try:
+#     jsonWritingPath = sys.argv[6]
+# except:
+#     jsonWritingPath = str(raw_input('Please provide remote server writing path: '))
+#     pass
+# # User sets remote username
+# try:
+#     username = (sys.argv[7])
+# except:
+#     username = (str(raw_input('Please provide username: ')))
+#     pass
+# # User sets remote password
+# try:
+#     password = (sys.argv[8])
+# except:
+#     password = (str(raw_input('Please provide password: ')))
+#     pass
 
 if not os.path.exists('./tmp/'):
     os.makedirs('./tmp/')    
@@ -113,42 +120,52 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mong
     elapsed = time.time() - t
     print 'Stage 3: %.2f seconds' % elapsed
 
+    client2 = MongoClient(mongoTargetHost)
+    db2 = client2[dataCollection+'Target']
+    db2.dynCommunities.drop()
+    db2.dynUserData.drop()
+    dyccos=db2.dynCommunities
+    userjsonData = db2.dynUserData
+
     print "Ranking Commences"
     numTopComms = 20 #how many dynamic communities to create illustrations for
-    rankedCommunities = dataEvol.commRanking(numTopComms)
+    jsondata = dataEvol.commRanking(numTopComms,userjsonData)
+
+    dyccos.insert(jsondata)
+    client2.close()
+
 
     os.remove('./tmp/'+dataCollection+'UserDict.pck')
 
-    jsonFiles = glob.glob('./tmp/*.json')
- 
-    ssh = copyFilesRemotely.SSHConnection(remoteServer, username, password)
-    for origin in jsonFiles:
-        if platform.system().lower() == 'windows':
-            filename = origin.split('\\')[-1]
-        else:
-            filename = origin.split('/')[-1]
-        dst = (jsonWritingPath+'/visualizationModule/jsons/'+filename)
-        ssh.sftpPut(origin, dst)
-        os.remove(origin)
-    ssh.close()
+    # jsonFiles = glob.glob('./tmp/*.json')
+
+    # ssh = copyFilesRemotely.SSHConnection(remoteServer, username, password)
+    # for origin in jsonFiles:
+    #     if platform.system().lower() == 'windows':
+    #         filename = origin.split('\\')[-1]
+    #     else:
+    #         filename = origin.split('/')[-1]
+    #     dst = (jsonWritingPath+'/visualizationModule/jsons/'+filename)
+    #     ssh.sftpPut(origin, dst)
+    #     os.remove(origin)
+    # ssh.close()    
 
     pointerFile = open('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mongoRecentTime+'communities.txt','w')
     pointerFile.close()
-
-
 
 #send success message to rabbitMQ server
 try:
     credentials = pika.PlainCredentials('test', 'test')
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+        channel = connection.channel()
+        channel.queue_declare(queue='success')
+        channel.basic_publish(exchange='',routing_key='success',body='SUCCESS')
+        connection.close()
     except:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='160.40.50.236', credentials=credentials))
+        # connection = pika.BlockingConnection(pika.ConnectionParameters(host='160.40.50.236', credentials=credentials))
+        print 'please provide pika credentials and address'
         pass
-    channel = connection.channel()
-    channel.queue_declare(queue='success')
-    channel.basic_publish(exchange='',routing_key='success',body='SUCCESS')
-    connection.close()
 except:
     pass
 
