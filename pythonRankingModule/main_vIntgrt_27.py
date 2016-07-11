@@ -9,7 +9,7 @@
 # Copyright:     (c) ITI (CERTH) 2015
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
-# Terminal window command would be: python main_vIntgrt_27.py MongoDB_hostIP collectionId timestamp_start timestamp_end
+# Terminal window command would be: python main_vIntgrt_27.py MongoDB_host collectionId timestamp_start timestamp_end
 # timestamp_start & timestamp_end are optional parameters
 #-------------------------------------------------------------------------------
 import time, os, sys, socket, glob, pika
@@ -29,17 +29,20 @@ t = time.time()
 # User sets mongo host
 try:
     mongoHost = sys.argv[1]
-    socket.inet_aton(mongoHost)
+    client = MongoClient(mongoHost)
+    client.database_names()
 except:
     mongoHost = 'localhost'
-    print 'MongoDB_hostIP %s is not available. localhost is used' %sys.argv[1]  
+    print 'MongoDB_host %s is not available. localhost is used' %sys.argv[1]  
+    client = MongoClient(mongoHost)
+    client.database_names()
     pass
 
 try:
     dataCollection = sys.argv[2]
 except:
     dataCollection = 'testDataset'
-    print 'collectionId %s is not available. testDataset is used' %sys.argv[2]  
+    print 'no collectionId was provided. testDataset is used'
     pass
 # User sets timestamp_start
 try:
@@ -61,7 +64,6 @@ except:
 if not os.path.exists('./tmp/'):
     os.makedirs('./tmp/')    
 
-client = MongoClient(mongoHost)
 db = client[dataCollection]
 coll = db.items
 if lowerTime and upperTime:
