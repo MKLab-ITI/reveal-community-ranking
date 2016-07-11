@@ -104,13 +104,13 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mong
     jsondata = dataEvol.commRanking(numTopComms,userjsonData)
 
     dyccos.insert(jsondata)
-    client.close()
 
     os.remove('./tmp/'+dataCollection+'UserDict.pck')
 
     pointerFile = open('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mongoRecentTime+'communities.txt','w')
     pointerFile.close()
 
+client.close()
 #send success message to rabbitMQ server
 try:
     credentials = pika.PlainCredentials('test', 'test')
