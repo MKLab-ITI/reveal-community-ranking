@@ -38,7 +38,7 @@ var colname = gup("collection");
 
 $.ajax({
     type: "GET",
-    url: "jsons/" + colname + "communities.json",
+    url: "http://squall-3.atc.gr:8080/reveal-services/rest/dynamic-communities?assessmentId="+colname,//"jsons/" + colname + "communities.json",
     dataType: "json",
     success: function(data) {
 

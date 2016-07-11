@@ -2270,7 +2270,7 @@
                     return '<h3>' + x + '</h3>' +
                             '<p>' + y + '</p>'
                 }
-        , noData = 'No Data Available.'
+        , noData = 'Still processing data, please revisit page in few minutes'
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide')
                 ;
 
@@ -2578,7 +2578,7 @@
                 , id = lines.id()
                 , state = nv.utils.state()
                 , defaultState = null
-                , noData = 'No Data Available.'
+                , noData = 'Still processing data, please revisit page in few minutes'
                 , average = function(d) {
                     return d.average
                 }
@@ -3706,7 +3706,7 @@
                 }
         , x
                 , y
-                , noData = "No Data Available."
+                , noData = "Still processing data, please revisit page in few minutes"
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'beforeUpdate', 'renderEnd')
                 , duration = 250
                 ;
@@ -4551,7 +4551,7 @@
                 , y
                 , state = {}
         , defaultState = null
-                , noData = 'No Data Available.'
+                , noData = 'Still processing data, please revisit page in few minutes'
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
                 , transitionDuration = 250
                 ;
@@ -5616,7 +5616,7 @@
                 , y
                 , state = nv.utils.state()
                 , defaultState = null
-                , noData = 'No Data Available.'
+                , noData = 'Still processing data, please revisit page in few minutes'
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
                 , duration = 250
                 ;
@@ -6129,7 +6129,7 @@
                 , y2
                 , y3
                 , y4
-                , noData = "No Data Available."
+                , noData = "Still processing data, please revisit page in few minutes"
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'brush', 'stateChange', 'changeState')
                 , transitionDuration = 0
                 , state = nv.utils.state()
@@ -6812,7 +6812,7 @@
                     return '<h3>' + key + '</h3>' +
                             '<p>' + y + ' at ' + x + '</p>'
                 }
-        , noData = "No Data Available."
+        , noData = "Still processing data, please revisit page in few minutes"
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'brush', 'stateChange', 'changeState')
                 , transitionDuration = 250
                 , state = nv.utils.state()
@@ -7866,7 +7866,7 @@
                 , y //can be accessed via chart.yScale()
                 , state = nv.utils.state()
                 , defaultState = null
-                , noData = "No Data Available."
+                , noData = "Still processing data, please revisit page in few minutes"
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
                 , controlWidth = function() {
                     return showControls ? 180 : 0
@@ -8871,7 +8871,7 @@
                 , y //can be accessed via chart.yScale()
                 , state = nv.utils.state()
                 , defaultState = null
-                , noData = 'No Data Available.'
+                , noData = 'Still processing data, please revisit page in few minutes'
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
                 , controlWidth = function() {
                     return showControls ? 180 : 0
@@ -9314,7 +9314,7 @@
                 },
                 x,
                 y,
-                noData = 'No Data Available.',
+                noData = 'Still processing data, please revisit page in few minutes',
                 yDomain1,
                 yDomain2,
                 getX = function(d) {
@@ -10895,7 +10895,7 @@
                 }
         , state = nv.utils.state()
                 , defaultState = null
-                , noData = "No Data Available."
+                , noData = "Still processing data, please revisit page in few minutes"
                 , duration = 250
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
                 ;
@@ -11822,7 +11822,7 @@
         , state = nv.utils.state()
                 , defaultState = null
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
-                , noData = "No Data Available."
+                , noData = "Still processing data, please revisit page in few minutes"
                 , duration = 250
                 ;
 
@@ -12526,7 +12526,7 @@
                 , showValue = true
                 , alignValue = true
                 , rightAlignValue = false
-                , noData = "No Data Available."
+                , noData = "Still processing data, please revisit page in few minutes"
                 ;
 
         function chart(selection) {
@@ -13205,7 +13205,7 @@
                 , yAxisTickFormat = d3.format(',.2f')
                 , state = nv.utils.state()
                 , defaultState = null
-                , noData = 'No Data Available.'
+                , noData = 'Still processing data, please revisit page in few minutes'
                 , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
                 , controlWidth = 250
                 , cData = ['Stacked', 'Stream', 'Expanded']

@@ -180,7 +180,7 @@ function createnet(com, timeslot) {
 
     $.ajax({
         type: "GET",
-        url: "jsons/" + colname + "users" + comclick + ".json",
+        url: "http://squall-3.atc.gr:8080/reveal-services/rest/dynamic-users?assessmentId="+colname+"&id="+comclick,//"jsons/" + colname + "users" + comclick + ".json",
         dataType: "json",
         success: function (data) {
             datag = data;
@@ -517,7 +517,7 @@ function animate(direction) {
 
     $.ajax({
         type: "GET",
-        url: "jsons/" + colname + "users" + comclick + ".json",
+        url: "http://squall-3.atc.gr:8080/reveal-services/rest/dynamic-users?assessmentId="+colname+"&id="+comclick,//"jsons/" + colname + "users" + comclick + ".json",
         dataType: "json",
         success: function (data) {
 

@@ -315,7 +315,7 @@
 }
 
 #chart4 svg text, #chart1 svg text, #chart3 svg text, #g1 svg text {
-    font: normal 13px Arial;
+    font: bold 16px Arial;
 }
 
 #chart4 svg .title, #chart1 svg .title, #chart3 svg .title, #g1 svg .title {
