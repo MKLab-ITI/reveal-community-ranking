@@ -32,13 +32,14 @@ try:
     socket.inet_aton(mongoHost)
 except:
     mongoHost = 'localhost'
-    print 'MongoDB_hostIP %s is not available. localhost is used' %mongoTargetHost  
+    print 'MongoDB_hostIP %s is not available. localhost is used' %sys.argv[1]  
     pass
 
 try:
     dataCollection = sys.argv[2]
 except:
     dataCollection = 'testDataset'
+    print 'collectionId %s is not available. testDataset is used' %sys.argv[2]  
     pass
 # User sets timestamp_start
 try:
