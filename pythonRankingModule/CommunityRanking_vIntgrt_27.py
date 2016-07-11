@@ -90,7 +90,7 @@ class communityranking(object):
             except:
                 print 'bad tweet'
                 pass
-        client.close()
+        # client.close()
         
         statement = ('Total # of Tweets= ' + unicode(totTweets) + '\nTotal # of Tweets with mentions: ' +
             unicode(totMentTws) + '\nTotal # of Tweets without mentions: ' + unicode(totNonMentTws) +
@@ -826,8 +826,8 @@ class communityranking(object):
         conmax - max num of connections/edges
         fixed - centrality accuracy in digits
         '''
-        with open('./tmp/'+self.dataCollection+'communities.json', 'w') as webDrawFile:
-            webDrawFile.write(unicode(json.dumps(jsondata, sort_keys=True)))
+        # with open('./tmp/'+self.dataCollection+'communities.json', 'w') as webDrawFile:
+        #     webDrawFile.write(unicode(json.dumps(jsondata, sort_keys=True)))
         return jsondata
 
 

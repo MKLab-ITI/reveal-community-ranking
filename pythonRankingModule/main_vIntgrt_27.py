@@ -9,6 +9,9 @@
 # Copyright:     (c) ITI (CERTH) 2015
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
+# Terminal window command would be: python main_vIntgrt_27.py MongoDB_hostIP collectionId timestamp_start timestamp_end
+# timestamp_start & timestamp_end are optional parameters
+#-------------------------------------------------------------------------------
 import time, os, sys, socket, glob, pika
 '''Check for dependencies'''
 try:
@@ -29,15 +32,9 @@ try:
     socket.inet_aton(mongoHost)
 except:
     mongoHost = 'localhost'
+    print 'MongoDB_hostIP %s is not available. localhost is used' %mongoTargetHost  
     pass
-try:
-    mongoTargetHost = 'social1.atc.gr:27017'
-    socket.inet_aton(mongoTargetHost)
-except:
-    print 'target mongo host %s is not available' %mongoTargetHost  
-    mongoTargetHost = str(raw_input('Please provide target mongo host: '))
-    pass
-# User sets json dataset folder
+
 try:
     dataCollection = sys.argv[2]
 except:
@@ -78,6 +75,9 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mong
 
     print dataCollection
 
+    db.dynCommunities.drop()
+    db.dynUserData.drop()
+
     txtfiles = glob.glob('./tmp/'+dataCollection+'*.txt')
     for txt in txtfiles:
         os.remove(txt)
@@ -95,19 +95,15 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mong
     elapsed = time.time() - t
     print 'Stage 3: %.2f seconds' % elapsed
 
-    client2 = MongoClient(mongoTargetHost)
-    db2 = client2[dataCollection]
-    db2.dynCommunities.drop()
-    db2.dynUserData.drop()
-    dyccos=db2.dynCommunities
-    userjsonData = db2.dynUserData
+    dyccos=db.dynCommunities
+    userjsonData = db.dynUserData
 
     print "Ranking Commences"
     numTopComms = 20 #how many dynamic communities to create illustrations for
     jsondata = dataEvol.commRanking(numTopComms,userjsonData)
 
     dyccos.insert(jsondata)
-    client2.close()
+    client.close()
 
     os.remove('./tmp/'+dataCollection+'UserDict.pck')
 
