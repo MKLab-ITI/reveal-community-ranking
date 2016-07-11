@@ -315,7 +315,7 @@
 }
 
 #chart4 svg text, #chart1 svg text, #chart3 svg text, #g1 svg text {
-    font: bold 16px Arial;
+    font: normal 13px Arial;
 }
 
 #chart4 svg .title, #chart1 svg .title, #chart3 svg .title, #g1 svg .title {
@@ -331,8 +331,8 @@
 }
 
 .nvd3.nv-noData {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 18px !important;
+    font-weight: bold !important;
 }
 
 /**********
