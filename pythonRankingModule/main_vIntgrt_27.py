@@ -109,7 +109,6 @@ if not os.path.exists('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mong
 
     pointerFile = open('./tmp/'+dataCollection+lowerLabel+'_'+upperLabel+'_'+mongoRecentTime+'communities.txt','w')
     pointerFile.close()
-
 client.close()
 #send success message to rabbitMQ server
 try:

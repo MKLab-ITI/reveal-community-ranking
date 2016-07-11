@@ -227,7 +227,7 @@ class communityranking(object):
             adjauthors, adjments = izip(*adjusrs)
             adjList = list(izip(adjauthors, adjments, weights))
 
-            # print 'For Timeslot: '+unicode(fileNum)+' comprising '+unicode(len(adjList))+' edges.'
+            print 'For Timeslot: '+unicode(fileNum)+' comprising '+unicode(len(adjList))+' edges.'
 
             self.usersPerTmsl[timeslot] = list(set(itertools.chain.from_iterable([authors,mentions])))
 
