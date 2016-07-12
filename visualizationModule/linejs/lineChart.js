@@ -29,7 +29,7 @@ nv.models.lineChart = function () {
         , y
         , state = {}
         , defaultState = null
-        , noData = 'No Data Available.'
+        , noData = 'Still processing data, please revisit page in few minutes'
         , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState')
         , transitionDuration = 250
         ;

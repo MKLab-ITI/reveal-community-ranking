@@ -331,8 +331,8 @@
 }
 
 .nvd3.nv-noData {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 18px !important;
+    font-weight: bold !important;
 }
 
 /**********
