@@ -150,6 +150,7 @@ class communityranking(object):
         self.samplingTime = samplingTime
         self.usersPerTmsl = {}
         self.userPgRnkBag = {}
+        self.userPgRnkBagRanked = {}
         self.commBag = {}
         self.urlBag = {}
         self.adjListBag = {}
@@ -249,7 +250,9 @@ class communityranking(object):
             tempUserPgRnk = {}
             for i,k in enumerate(usrlist):
                 tempUserPgRnk[k] = igraphUserPgRnk[i]#/pgRnkMax
+            sortedtempUserPgRnk = sorted(tempUserPgRnk,key=tempUserPgRnk.get, reverse=True)
             self.userPgRnkBag[timeslot] = tempUserPgRnk
+            self.userPgRnkBagRanked[timeslot] = sortedtempUserPgRnk
 
             #Detect Communities using the infomap algorithm#
             extractedComms = gDirected.community_infomap(edge_weights = 'weight')
@@ -676,10 +679,11 @@ class communityranking(object):
 
                 uscentr = []
                 for us in users:
-                    uscentr.append([us, self.userPgRnkBag[uniCommIdsEvol[rcomms][0][tmsl]][us]])
-                uscentr = sorted(uscentr, key=itemgetter(1), reverse=True)
+                    # uscentr.append([us, self.userPgRnkBag[uniCommIdsEvol[rcomms][0][tmsl]][us]])
+                    uscentr.append([us, self.userPgRnkBagRanked[uniCommIdsEvol[rcomms][0][tmsl]].index(us)])
+                uscentr = sorted(uscentr, key=itemgetter(1))#, reverse=True)
                 usersCentralityPerSlot[unicode(self.timeLimit[uniCommIdsEvol[rcomms][0][tmsl]])] = uscentr[:10]
-                allCentralityValues.extend([x[1] for x in uscentr[:10]])
+                # allCentralityValues.extend([x[1] for x in uscentr[:10]])
 
                 tmptweetText = [' '.join([i for i in regex2.findall(regex1.sub('',x.lower())) if i and not i.startswith(('rt','htt','(@','\'@','t.co')) and i not in definiteStop]) for x in self.commTweetBag[rcomms][tmsl]]
                 tmptweetText = [x for x in tmptweetText if x]
@@ -788,10 +792,10 @@ class communityranking(object):
         allRankedCommunityCentralities.sort()
         allRankedCommunityConnections.sort()
     	
-    	try:
-            minCtlVal = float(min([x for x in set(allCentralityValues) if x!=0]))
-    	except:
-    		minCtlVal = 1.0
+    	# try:
+     #        minCtlVal = float(min([x for x in set(allCentralityValues) if x!=0]))
+    	# except:
+    	# 	minCtlVal = 1.0
     	try:
             minBgmVal = float(min([x for x in set(allBigramValues) if x!=0]))
     	except:
@@ -807,10 +811,10 @@ class communityranking(object):
 
         for idx in range(numTopComms):
             for idx2 in range(timeslots):
-                jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['commKeywords'] = [[v[0],v[1]/minKwdVal] for v in jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['commKeywords']]
-                jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['communityBigramsPerSlot'] = [[v[0],v[1]/minBgmVal] for v in jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['communityBigramsPerSlot']]
-                jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['usersCentrality'] = [[v[0],v[1]/minCtlVal] for v in jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['usersCentrality']]
-                jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['commHashTags'] = [[v[0],v[1]/minHtgVal] for v in jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['commHashTags']]
+                jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['commKeywords'] = [[v[0],float(v[1]/minKwdVal)] for v in jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['commKeywords']]
+                jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['communityBigramsPerSlot'] = [[v[0],float(v[1]/minBgmVal)] for v in jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['communityBigramsPerSlot']]
+                # jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['usersCentrality'] = [[v[0],v[1]/minCtlVal] for v in jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['usersCentrality']]
+                jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['commHashTags'] = [[v[0],float(v[1]/minHtgVal)] for v in jsondata['ranked_communities'][idx]['DyCContainer'][idx2]['commHashTags']]
 
         jsondata['datasetInfo']['limits'] = {'min':500,'max':500,'usersmin':np.median(allRankedCommunitySizes[:11]),'usersmax':np.median(allRankedCommunitySizes[-5:]),
         'centmin':np.median(allRankedCommunityCentralities[:11]),'centmax':np.median(allRankedCommunityCentralities[-5:]),
