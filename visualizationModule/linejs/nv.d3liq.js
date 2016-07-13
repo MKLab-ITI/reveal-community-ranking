@@ -910,12 +910,12 @@
             }
             if (container.parentElement.id === "chart1") {
 
-                if (mousex + 750 > windowWidth) {                    
-                    if (mousex - 800 < 0){
+                if (mousex + 820 > windowWidth) {
+                    if (mousex - 820 < 0){
                         left=0;
                     }
                     else{
-                        left = mousex - 800;
+                        left = mousex - 820;
                     }
                     
                 }

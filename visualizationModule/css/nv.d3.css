@@ -239,7 +239,7 @@
 .nvtooltip table {
     border-spacing: 6px;
     background-color: #E8E8E8;
-    width: 750px;
+    width: 770px;
 }
 
 .nvtooltip table td {
@@ -254,7 +254,7 @@
     width: 150px;
     margin-top: 5px !important;
     padding: 0 !important;
-
+    text-transform: lowercase;
 }
 
 .nvtooltip table thead td {
@@ -937,7 +937,7 @@ Interactive Layer
 }
 
 .nv-x .nv-axisMaxMin {
-/ / display : none;
+display : none;
 }
 
 #chart3 .nv-axis .tick text {
