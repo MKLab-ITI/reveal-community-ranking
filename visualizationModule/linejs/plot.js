@@ -1,6 +1,6 @@
 var chart, chart3;
 var con = [];
-var cumlen = 20;
+var cumlen;
 var timelen;
 var conlen;
 var cum = [];
@@ -26,24 +26,22 @@ var contimestamp = [];
 var concommunity = [];
 var conquality = [];
 var min, max, usersmin, usersmax, centmin, centmax, conmin, conmax, fixed;
-for (var i = 0; i < cumlen; i++) {
-    cum[i] = [];
-}
+
 var mindate;
 var maxdate;
 var tickMarks = [];
-var tickMarks2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+var tickMarks2 = [];
 var timestamps = [];
 var colname = gup("collection");
 
 $.ajax({
     type: "GET",
-    url: "http://squall-3.atc.gr:8080/reveal-services/rest/dynamic-communities?assessmentId="+colname,//"jsons/" + colname + "communities.json",
+    url: "http://squall-3.atc.gr:8080/fake-post/rest/dynamic-communities?assessmentId=" + colname,//"jsons/" + colname + "communities.json",
     dataType: "json",
-    success: function(data) {
+    success: function (data) {
 
-        min = data.datasetInfo.limits.min+12000;
-        max = data.datasetInfo.limits.max+15000;
+        min = data.datasetInfo.limits.min + 12000;
+        max = data.datasetInfo.limits.max + 15000;
         usersmin = data.datasetInfo.limits.usersmin;
         usersmax = data.datasetInfo.limits.usersmax;
         centmin = data.datasetInfo.limits.centmin;
@@ -53,11 +51,18 @@ $.ajax({
         fixed = data.datasetInfo.limits.fixed;
 
         timelen = data.datasetInfo.allTimeslots.length;
-        mindate = (data.datasetInfo.allTimeslots[0]-min) * 1000;
+        mindate = (data.datasetInfo.allTimeslots[0] - min) * 1000;
         maxdate = (data.datasetInfo.allTimeslots[timelen - 1] + max) * 1000;
         conlen = 0;
 
+        cumlen = data.ranked_communities.length;
+        for (var ticks = 1; ticks <= cumlen; ticks++) {
+            tickMarks2.push(ticks);
+        }
 
+        for (var i = 0; i < cumlen; i++) {
+            cum[i] = [];
+        }
         for (var i = 0; i < cumlen; i++) {
             var arr1 = [];
             var arr2 = [];
@@ -243,36 +248,36 @@ $.ajax({
     },
     async: false
 });
-nv.addGraph(function() {
+nv.addGraph(function () {
     chart = nv.models.lineChart()
-            .margin({left: 100})
-            .transitionDuration(350)
-            .useInteractiveGuideline(false)
-            .showYAxis(true)
-            .showXAxis(true)
-            .forceX([new Date(mindate), new Date(maxdate)])
-            .forceY([1, 20])
-            .height($(window).height() - 30)
-            .showLegend(false)
-            .yDomain([21, 1]);
+        .margin({left: 100})
+        .transitionDuration(350)
+        .useInteractiveGuideline(false)
+        .showYAxis(true)
+        .showXAxis(true)
+        .forceX([new Date(mindate), new Date(maxdate)])
+        .forceY([1, cumlen])
+        .height($(window).height() - 30)
+        .showLegend(false)
+        .yDomain([21, 1]);
 
     chart.xAxis
-            .axisLabel("")
-            .tickValues(tickMarks)
-            .tickFormat(function(d) {
-                return d3.time.format('%e %b %H:%M')(new Date(d));
-            });
+        .axisLabel("")
+        .tickValues(tickMarks)
+        .tickFormat(function (d) {
+            return d3.time.format('%e %b %H:%M')(new Date(d));
+        });
 
     chart.yAxis
-            .tickValues(tickMarks2)
-            .tickFormat(function(d) {
-                return "Community   " + d;
-            });
+        .tickValues(tickMarks2)
+        .tickFormat(function (d) {
+            if(jQuery.inArray(d, tickMarks2) !== -1)return "Community   " + d;
+        });
 
     d3.select('#chart1 svg')
-            .datum(databul())
-            .call(chart);
-    chart.lines.dispatch.on('elementClick', function(e) {//epointy-1//timestamps.indexOf(e.point.x)
+        .datum(databul())
+        .call(chart);
+    chart.lines.dispatch.on('elementClick', function (e) {//epointy-1//timestamps.indexOf(e.point.x)
         var full = 1;
         if ($('#admin').text().substr(21) === "Users") {
             if (users[e.point.y - 1][timestamps.indexOf(e.point.x)] === 0) {
@@ -296,40 +301,40 @@ nv.addGraph(function() {
         else {
             createnet(e.point.y, timestamps.indexOf(e.point.x));
 
-            nv.addGraph(function() {
+            nv.addGraph(function () {
                 chart3 = nv.models.lineChart()
-                        .margin({top: 15, left: 100})
-                        .transitionDuration(350)
-                        .useInteractiveGuideline(false)
-                        .showYAxis(true)
-                        .showXAxis(true)
-                        .forceX([new Date(mindate), new Date(maxdate)])
-                        .showLegend(false)
-                        .tooltips(false);
+                    .margin({top: 15, left: 100})
+                    .transitionDuration(350)
+                    .useInteractiveGuideline(false)
+                    .showYAxis(true)
+                    .showXAxis(true)
+                    .forceX([new Date(mindate), new Date(maxdate)])
+                    .showLegend(false)
+                    .tooltips(false);
 
                 chart3.xAxis
-                        .tickValues(tickMarks)
-                        .rotateLabels(-45)
-                        .tickFormat(function(d) {
-                            return d3.time.format('%e %b %H:%M')(new Date(d));
-                        });
+                    .tickValues(tickMarks)
+                    .rotateLabels(-45)
+                    .tickFormat(function (d) {
+                        return d3.time.format('%e %b %H:%M')(new Date(d));
+                    });
 
                 chart3.yAxis
-                        .tickValues(tickMarks2)
-                        .tickFormat(function(d) {
-                            return "Community   " + d;
-                        });
+                    .tickValues(tickMarks2)
+                    .tickFormat(function (d) {
+                        return "Community   " + d;
+                    });
                 d3.select('#chart3 svg')
-                        .datum(databulone(e.point.y))
-                        .call(chart3);
+                    .datum(databulone(e.point.y))
+                    .call(chart3);
 
 
-                chart3.lines.dispatch.on('elementClick', function(e) {
+                chart3.lines.dispatch.on('elementClick', function (e) {
                     if (e.point.z !== 0) {
                         animate(timestamps.indexOf(e.point.x));
                     }
                 });
-                setTimeout(function() {
+                setTimeout(function () {
                     var text = $('#admin').text();
                     //for (var i = 0; i < 1; i++) {
                     for (var j = 0; j < timelen; j++) {
@@ -378,8 +383,8 @@ nv.addGraph(function() {
 
 
                     d3.select('#chart3')
-                            .selectAll('path.nv-line')
-                            .style('opacity', 0);
+                        .selectAll('path.nv-line')
+                        .style('opacity', 0);
                     $("#chart3 .nv-axisMaxMin").hide();
                 }, 100);
                 return chart;
@@ -387,7 +392,7 @@ nv.addGraph(function() {
 
             $('#container').stop().animate({"opacity": 1});
 
-            $('#chart2,#chart1').stop().animate({"opacity": 0}, 1000, function() {
+            $('#chart2,#chart1').stop().animate({"opacity": 0}, 1000, function () {
                 $('#chart2,#chart1').hide();
             });
 
@@ -395,12 +400,12 @@ nv.addGraph(function() {
         }
     });
 
-var toolheight;
-    chart.lines.dispatch.on('elementMouseover', function(e) {
+    var toolheight;
+    chart.lines.dispatch.on('elementMouseover', function (e) {
 
         $('.nvtooltip').html('');
         if (e.point.z > 0) {
-            toolheight=200;
+            toolheight = 200;
             $('.nvtooltip').html('<table class="nv-pointer-events-none"><thead></thead><tbody></tbody></table>');
             $('.nvtooltip table thead').append('<tr class="nv-pointer-events-none"><td colspan="3" class="nv-pointer-events-none"><strong class="x-value">' + d3.time.format('%e %b %H:%M')(new Date(e.point.x)) + '</strong></td></tr>')
             $('.nvtooltip table tbody').append('<tr class="nv-pointer-events-none"><td class="legend-color-guide nv-pointer-events-none"><div style="background-color: #000000;" class="nv-pointer-events-none"></div></td><td class="key nv-pointer-events-none">Centrality <span>' + centrality[e.point.y - 1][timestamps.indexOf(e.point.x)].toFixed(fixed) + '</span></td></tr>');
@@ -454,7 +459,7 @@ var toolheight;
                 $('.nvtooltip #ta2').append('<p class="ftweets">' + furls[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 4] + '&nbsp;&nbsp;&nbsp;<b>(' + furlssize[e.point.y - 1][((timestamps.indexOf(e.point.x)) * 5) + 4] + ')</b></p>');
             }
 
-            setTimeout(function() {
+            setTimeout(function () {
 
                 if (!(tags[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] === "-")) {
                     $('#hashtagsdiv').append('<p style="font-size:12px;padding: 2px 10px;float: left;text-align: left;width: 100px;word-wrap: break-word;white-space: normal;text-align: left;">' + tags[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5] + '</p><p style="padding:0;display: inline-block;float: right;top: 2px;position: relative;margin-right: 2px;">' + Math.round(tagssize[e.point.y - 1][(timestamps.indexOf(e.point.x)) * 5]) + '</p>');
@@ -539,12 +544,12 @@ var toolheight;
 
             }, 500);
             d3.select('g.nv-interactive').append("g").attr("class", " nv-wrap nv-interactiveLineLayer").append("g").attr("class", "nv-interactiveGuideLine").append("line")
-                    .attr("class", "nv-guideline")
-                    .attr("x1", e.pos[0] - 100)
-                    .attr("x2", e.pos[0] - 100)
-                    .attr("y1", $('.nv-lineChart g rect').attr('height'))
-                    .attr("y2", 0)
-                    ;
+                .attr("class", "nv-guideline")
+                .attr("x1", e.pos[0] - 100)
+                .attr("x2", e.pos[0] - 100)
+                .attr("y1", $('.nv-lineChart g rect').attr('height'))
+                .attr("y2", 0)
+            ;
             //line.exit().remove();;
 
 
@@ -572,7 +577,7 @@ var toolheight;
         //}, 300);
     });
 
-    chart.lines.dispatch.on('elementMouseout', function() {
+    chart.lines.dispatch.on('elementMouseout', function () {
         $('.nvtooltip').html('');
         //$("#ta,#ta2").empty();   
         $('g.nv-interactive').html('');
@@ -580,7 +585,7 @@ var toolheight;
     });
 
 
-    setTimeout(function() {
+    setTimeout(function () {
         var text = $('#admin').text();
         $('#chart1 .nv-x .tick text').attr("transform", 'translate(0,' + -($('#chart1').height() + 30) + ')rotate(45 0 0)');
         for (var i = 0; i < cumlen; i++) {
@@ -630,9 +635,9 @@ var toolheight;
 //            .selectAll('path.nv-line')
 //            .style('opacity', 0);
         //$(".nv-y .nv-axisMaxMin").first().hide();
-       
-        $(".nv-x .nv-axisMaxMin").first().attr('transform', 'translate(0 -'+($(window).height()-58)+') rotate(45)');
-        $(".nv-x .nv-axisMaxMin").eq(1).attr('transform', 'translate('+($(window).width()-200)+' -'+($(window).height()-58)+') rotate(45)');
+
+        $(".nv-x .nv-axisMaxMin").first().attr('transform', 'translate(0 -' + ($(window).height() - 58) + ') rotate(45)');
+        $(".nv-x .nv-axisMaxMin").eq(1).attr('transform', 'translate(' + ($(window).width() - 200) + ' -' + ($(window).height() - 58) + ') rotate(45)');
 
 
     }, 100);
