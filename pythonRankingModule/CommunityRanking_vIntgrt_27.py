@@ -10,7 +10,7 @@
 # Copyright:     (c) ITI (CERTH) 2015
 # Licence:       <apache licence 2.0>
 #-------------------------------------------------------------------------------
-import time, dateutil.parser, collections, pickle, random, json
+import time, dateutil.parser, collections, pickle, random, json, sys
 import itertools, math, requests, re, concurrent.futures, nltk
 from io import open
 from itertools import izip
@@ -36,12 +36,8 @@ class communityranking(object):
         for tweet in tweet_iterator:
             json_line = tweet
             try:
-                try:
-                    mytime = int(int(json_line['timestamp_ms'])/1000)
-                except:
-                    dt = dateutil.parser.parse(json_line['created_at'],dayfirst=True)
-                    mytime = int(time.mktime(dt.timetuple()))
-                    pass
+                dt = dateutil.parser.parse(json_line['created_at'],dayfirst=True)
+                mytime = int(time.mktime(dt.timetuple()))
                 try:
                     json_line['entities']['user_mentions'][0]
                     len_ment = len(json_line['entities']['user_mentions'])
@@ -108,7 +104,9 @@ class communityranking(object):
 
         minTimeslotNum = 9
         timespan = float(alltime[-1]-alltime[0])
+        print 'timespan is ' +str(timespan)
         timeslotRatio = timespan/minTimeslotNum
+        print 'timeslotRatio is ' +str(timeslotRatio)
         if timeslotRatio > 2592000:
             samplingTime = 2592000.0
             print 'samplingTime is %s months' % (samplingTime/2592000)
@@ -158,21 +156,21 @@ class communityranking(object):
 
     def timeslotselection(self):
         ###Parsing commences###
-
-        #Find time distance between posts#
-        time2 = np.append(self.alltime[0], self.alltime)
-        time2 = time2[0:len(time2) - 1]
-        timeDif = self.alltime - time2
+        
         lT = len(self.alltime)
 
         mentionLimit, timeIni = [], self.alltime[0]
         for i in range(lT):
             if self.alltime[i] > timeIni+self.samplingTime:
-                timeIni = timeIni+self.samplingTime
+                timeIni = self.alltime[i]+self.samplingTime
                 mentionLimit.append(i)
+
+        if len(mentionLimit) < 4:
+            sys.exit('The timeline is too short, please use a longer dataset')
+            
         if mentionLimit[-1] != i:
             mentionLimit.append(i)
-
+            
         return mentionLimit
 
     def extraction(self):
@@ -557,11 +555,11 @@ class communityranking(object):
 
         '''Create corpus and stopwords'''
     	try:
-    		stopW = stopwords.words('english')
+            stopW = stopwords.words('english')
     	except:
-    		nltk.download('stopwords')
-    		stopW = stopwords.words('english')
-    		pass
+            nltk.download('stopwords')
+            stopW = stopwords.words('english')
+            pass
         if 'greek' in self.dataCollection.lower():
             session = requests.Session()
             grstopwords = session.get('https://www.dropbox.com/s/d6rvcmfu6c5jlsp/greek_stopwords.txt?raw=1').content.decode('ISO-8859-7').split('\r\n')
